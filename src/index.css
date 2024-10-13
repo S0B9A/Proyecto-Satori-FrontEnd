@@ -1,0 +1,59 @@
+
+/*Header*/
+
+body{
+  margin: 0 auto;
+  padding: 0;
+  min-height: 100vh;
+  }
+
+  .css-6lj6mq-MuiGrid-root>.MuiGrid-item {
+    padding-left: 0 !important;
+}
+
+#card{
+  margin-left: 100px;
+  margin-right: 60px;
+}
+
+button{
+  background-color: #ff0000;
+  color: white;
+  text-decoration: solid;
+  border-radius: 6px;
+  width: 150px;
+  height: 40px;
+  margin-top: 5px;
+}
+
+.css-3sdd9w-MuiPaper-root-MuiCard-root {
+  border-radius: 8px !important;
+}
+
+/* CSS responsivo HOME */
+/* CSS responsivo */
+/* CSS responsivo */
+@media (max-width: 768px) {
+  .MuiCard-root {
+    flex-direction: column !important; /* Coloca la imagen arriba y el contenido abajo */
+    height: auto !important; /* Ajusta la altura automáticamente */
+    max-width: 300px !important; /* Máximo ancho de la tarjeta */
+    margin: auto !important; /* Centra la tarjeta */
+  }
+  
+  .MuiCardMedia-root {
+    width: 93% !important; /* La imagen ocupa todo el ancho */
+    height: 150px !important; /* Altura de la imagen */
+    border-radius: 10px !important; /* Bordes redondeados para la imagen */
+    object-fit: cover !important; /* Ajusta la imagen para que no se distorsione */
+  }
+  
+  .MuiCardContent-root {
+    padding: 10px !important; /* Ajusta el espacio en el contenido */
+  }
+
+  .MuiTypography-root {
+    font-size: 0.9rem !important; /* Ajusta el tamaño del texto en pantallas más pequeñas */
+  }
+}
+

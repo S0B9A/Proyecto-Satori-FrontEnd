@@ -12,7 +12,10 @@ import { ListaCombos } from "./components/Combo/ListaCombos.jsx";
 import {DetalleCombo} from "./components/Combo/DetalleCombo.jsx";
 import {MenuActual} from "./components/Menu/MenuActual.jsx";
 import {ListaMenus} from "./components/Menu/ListaMenus.jsx";
+import TablaProductos from './components/Producto/TablaProductos.jsx';
 import {ListaEstaciones} from "./components/Estacion/ListaEstaciones.jsx";
+import { ActualizarProducto } from './components/Producto/ActualizarProducto.jsx';
+import { CrearProducto } from './components/Producto/CrearProducto.jsx';
 
 const rutas = createBrowserRouter([
   {
@@ -53,6 +56,18 @@ const rutas = createBrowserRouter([
       {
         path: "/estaciones",
         element: <ListaEstaciones/>,
+      },
+      {
+        path: '/producto-table',
+        element: <TablaProductos/>,
+      },
+      {
+        path: '/producto/update/:id',
+        element: <ActualizarProducto/>,
+      },
+      {
+        path: '/producto/Crear/',
+        element: <CrearProducto/>,
       },
       
     ],

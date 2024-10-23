@@ -9,6 +9,7 @@ import demoTheme from "../../themes/theme";
 import logo from "../Image/logo2.png";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import InventoryIcon from '@mui/icons-material/Inventory'; // Para Productos
+import BuildIcon from '@mui/icons-material/Build'; // Para Mantenimiento
 import FastfoodIcon from '@mui/icons-material/Fastfood'; // Para Combos
 import MenuBookIcon from '@mui/icons-material/MenuBook'; // Para Menu Actual
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu'; // Para Nuestros Menus
@@ -55,8 +56,13 @@ const NAVIGATION = [
     title: 'Nuestras Estaciones',
     icon: <PlaceIcon />, // Icono para Nuestras Estaciones
   },
-];
+  {
+    segment: 'producto-table',
+    title: 'Mantenimiento de productos',
+    icon: <BuildIcon />, // Icono para Nuestras Estaciones
+  },
 
+];
 
 function Header(props) {
   const { window } = props;

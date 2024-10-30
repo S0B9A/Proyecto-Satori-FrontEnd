@@ -27,6 +27,9 @@ const theme = createTheme({
 });
 
 export function ListaProductos() {
+//Url para acceder a la imagenes guardadas en el API
+const BASE_URL = import.meta.env.VITE_BASE_URL + 'uploads';
+
   //Resultado de consumo del API, respuesta
   const [data, setData] = useState(null);
   //Error del API
@@ -56,6 +59,8 @@ export function ListaProductos() {
   if (error) return <p>Error: {error.message}</p>;
 
   return (
+
+    
     <ThemeProvider theme={theme}>
       <Container component="main" sx={{ mt: 4, mb: 2 }}>
         <Typography
@@ -110,7 +115,7 @@ export function ListaProductos() {
                 <CardMedia
                   component="img"
                   sx={{ width: 150, borderRadius: "10px", margin: "10px" }} // Mantener imagen rectangular
-                  image={producto.imagen}
+                  image={`${BASE_URL}/${producto.imagen}`}
                   alt={producto.nombre}
                 />
                 <CardContent

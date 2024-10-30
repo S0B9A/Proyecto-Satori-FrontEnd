@@ -26,7 +26,7 @@ class productoService {
   createProducto(Producto) {
     return axios.post(BASE_URL, JSON.stringify(Producto));
   }
-
+  
 }
 
 export default new productoService();

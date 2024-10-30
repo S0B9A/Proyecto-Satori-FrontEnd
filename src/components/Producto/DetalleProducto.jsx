@@ -52,11 +52,10 @@ export function DetalleProducto() {
         <Grid container spacing={6} alignItems="center">
           <Grid item xs={12} md={6}>
             <CardMedia
-              component="img"
-              image={data.imagen}
-              alt={data.nombre}
+               component="img"
+               image={`${BASE_URL}/${data.imagen}`}
+               alt={data.nombre}
               sx={{ borderRadius: '10px', height: '300px', objectFit: 'cover' }}
-              
             />
              <Button sx={{ marginTop: '0.8rem' }} variant="contained" color="primary" fullWidth>
                 Agregar a la orden

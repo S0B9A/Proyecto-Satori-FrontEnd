@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-vars */
-//https://mui.com/material-ui/react-table/#sorting-amp-selecting
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import { alpha } from '@mui/material/styles';
@@ -23,9 +22,8 @@ import Switch from '@mui/material/Switch';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import ProductoService from '../../Services/ProductoServices';
-import { useState } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import { useNavigate, Link } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
@@ -137,11 +135,13 @@ TablaProductosHead.propTypes = {
 
 // Barra de opciones
 function TablaProductosToolbar(props) {
-    const { numSelected } = props;
-    const { idSelected } = props;
+    const { numSelected, idSelected } = props;
     const navigate = useNavigate();
+
     const update = () => {
-        return navigate(`/producto/update/${idSelected}`);
+        if (idSelected) {
+            navigate(`/producto/update/${idSelected}`);
+        }
     };
 
     return (
@@ -151,10 +151,7 @@ function TablaProductosToolbar(props) {
                 pr: { xs: 1, sm: 1 },
                 ...(numSelected > 0 && {
                     bgcolor: (theme) =>
-                        alpha(
-                            theme.palette.primary.main,
-                            theme.palette.action.activatedOpacity,
-                        ),
+                        alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
                 }),
             }}
         >
@@ -165,7 +162,7 @@ function TablaProductosToolbar(props) {
                     variant="subtitle1"
                     component="div"
                 >
-                    {numSelected} selected
+                    {numSelected} seleccionado
                 </Typography>
             ) : (
                 <Typography
@@ -182,17 +179,17 @@ function TablaProductosToolbar(props) {
                 <>
                     <Tooltip title="Borrar">
                         <IconButton>
-                            <DeleteIcon key={idSelected} />
+                            <DeleteIcon />
                         </IconButton>
                     </Tooltip>
                     <Tooltip title="Actualizar">
                         <IconButton onClick={update}>
-                            <EditIcon key={idSelected} />
+                            <EditIcon />
                         </IconButton>
                     </Tooltip>
                 </>
             ) : (
-                <Tooltip title="Filter list">
+                <Tooltip title="Filtrar lista">
                     <IconButton>
                         <FilterListIcon />
                     </IconButton>
@@ -210,37 +207,30 @@ TablaProductosToolbar.propTypes = {
 
 // Componente tabla
 export default function TablaProductos() {
-    // Datos a cargar en la tabla (array vacío para evitar el error)
+    // Datos a cargar en la tabla
     const [data, setData] = useState([]);
-
     const [error, setError] = useState('');
     const [loaded, setLoaded] = useState(false);
+    const [order, setOrder] = useState('asc');
+    const [orderBy, setOrderBy] = useState('nombre');
+    const [selected, setSelected] = useState([]);
+    const [page, setPage] = useState(0);
+    const [dense, setDense] = useState(false);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
 
     // Obtener lista del API
     useEffect(() => {
         ProductoService.getProductos()
             .then((response) => {
-                console.log(response);
-                setData(response.data || []);  // Asignar array vacío si no hay datos
+                setData(response.data || []); // Asignar array vacío si no hay datos
                 setError(response.error);
                 setLoaded(true);
             })
             .catch((error) => {
-                if (error instanceof SyntaxError) {
-                    setError(error);
-                    console.log(error);
-                    setLoaded(false);
-                    throw new Error('Respuesta no válida del servidor');
-                }
+                setError('Error al cargar los productos');
+                setLoaded(false);
             });
     }, []);
-
-    const [order, setOrder] = React.useState('asc');
-    const [orderBy, setOrderBy] = React.useState('year');
-    const [selected, setSelected] = React.useState([]);
-    const [page, setPage] = React.useState(0);
-    const [dense, setDense] = React.useState(false);
-    const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -249,12 +239,7 @@ export default function TablaProductos() {
     };
 
     const handleClick = (event, name) => {
-        let newSelected = [name];
-        const selectedIndex = selected.indexOf(name);
-
-        if (selectedIndex === 0) {
-            newSelected = [];
-        }
+        const newSelected = selected.indexOf(name) === 0 ? [] : [name];
         setSelected(newSelected);
     };
 
@@ -272,12 +257,10 @@ export default function TablaProductos() {
     };
 
     const isSelected = (name) => selected.indexOf(name) !== -1;
-
-    const emptyRows =
-        page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
+    const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
 
     if (!loaded) return <p>Cargando...</p>;
-    if (error) return <p>Error: {error.message}</p>;
+    if (error) return <p>Error: {error}</p>;
 
     return (
         <>
@@ -302,26 +285,20 @@ export default function TablaProductos() {
                                     rowCount={data.length}
                                 />
                                 <TableBody>
-                                    {/* Filas de la tabla */}
                                     {stableSort(data, getComparator(order, orderBy))
-                                        .slice(
-                                            page * rowsPerPage,
-                                            page * rowsPerPage + rowsPerPage,
-                                        )
+                                        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                         .map((row, index) => {
-                                            const isItemSelected = isSelected(row.nombre);
+                                            const isItemSelected = isSelected(row.id);
                                             const labelId = `enhanced-table-checkbox-${index}`;
 
                                             return (
                                                 <TableRow
                                                     hover
-                                                    onClick={(event) =>
-                                                        handleClick(event, row.nombre)
-                                                    }
+                                                    onClick={(event) => handleClick(event, row.id)}
                                                     role="checkbox"
                                                     aria-checked={isItemSelected}
                                                     tabIndex={-1}
-                                                    key={row.nombre}
+                                                    key={row.id}
                                                     selected={isItemSelected}
                                                 >
                                                     <TableCell padding="checkbox">
@@ -333,29 +310,16 @@ export default function TablaProductos() {
                                                             }}
                                                         />
                                                     </TableCell>
-                                                    <TableCell
-                                                        component="th"
-                                                        id={labelId}
-                                                        scope="row"
-                                                        padding="none"
-                                                    >
+                                                    <TableCell component="th" id={labelId} scope="row" padding="none">
                                                         {row.nombre}
                                                     </TableCell>
-                                                    <TableCell align="left">
-                                                        {row.descripcion}
-                                                    </TableCell>
-                                                    <TableCell align="left">
-                                                        {row.precio}
-                                                    </TableCell>
+                                                    <TableCell>{row.descripcion}</TableCell>
+                                                    <TableCell>{row.precio}</TableCell>
                                                 </TableRow>
                                             );
                                         })}
                                     {emptyRows > 0 && (
-                                        <TableRow
-                                            style={{
-                                                height: (dense ? 33 : 53) * emptyRows,
-                                            }}
-                                        >
+                                        <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
                                             <TableCell colSpan={6} />
                                         </TableRow>
                                     )}
@@ -372,10 +336,6 @@ export default function TablaProductos() {
                             onRowsPerPageChange={handleChangeRowsPerPage}
                         />
                     </Paper>
-                    <FormControlLabel
-                        control={<Switch checked={dense} onChange={handleChangeDense} />}
-                        label="Dense padding"
-                    />
                 </Box>
             )}
         </>

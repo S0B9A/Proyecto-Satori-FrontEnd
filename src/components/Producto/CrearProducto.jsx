@@ -15,6 +15,7 @@ import { toast } from "react-hot-toast";
 import { SelectEstacion } from "./Form/SelectEstacion";
 import EstacionServices from "../../Services/EstacionServices";
 
+
 export function CrearProducto() {
   const navigate = useNavigate();
   let formData = new FormData();
@@ -36,7 +37,13 @@ export function CrearProducto() {
     tipo: yup.string().required("El tipo de comida es requerido"),
     categoria: yup.string().required("La categoría del comida es requerida"),
     estaciones: yup.array().min(1, "La estación es requerida"),
-    image: yup.mixed().required("La imagen es requerida"),
+    image: yup
+      .mixed()
+      .test(
+        "fileRequired",
+        "La imagen es requerida",
+        (value) => value && value.size > 0
+      ),
   });
 
   const notify = () => {
@@ -63,10 +70,6 @@ export function CrearProducto() {
     resolver: yupResolver(ProductoSchema),
   });
 
-  // Gestión de errores
-  const [error, setError] = useState("");
-
-  const onError = (errors, e) => console.log(errors, e);
 
   const [file, setFile] = useState(null);
   const [fileURL, setFileURL] = useState(null);
@@ -80,48 +83,34 @@ export function CrearProducto() {
     }
   }
 
-  // Acción submit
+   //Gestión de errores
+   const [error, setError] = useState('');
+   // Si ocurre error al realizar el submit
+   const onError = (errors, e) => console.log(errors, e);
+ 
   const onSubmit = (DataForm) => {
-    console.log("Formulario:");
-    console.log(DataForm);
+    console.log("Formulario:", DataForm);
 
     try {
       if (ProductoSchema.isValid()) {
         formData.append("file", file); // Imagen
-
         formData.append("nombre", DataForm.nombre);
-
-        for (const [key, value] of formData.entries()) {
-          console.log(`${key}: ${value}`);
-        }
 
         ProductoService.createProducto(DataForm)
           .then((response) => {
             setError(response.error);
-            if (response.data != null) {
-              notify();
-            }
-          })
-          .catch((error) => {
-            if (error instanceof SyntaxError) {
-              console.log(error);
-              setError(error);
-              throw new Error("Respuesta no válida del servidor");
-            }
-          });
+            if (response.data != null) notify();
 
-        
-          ImagenProductoService.createImage(formData)
+            console.log("Contenido de formData:", formData);
+
+            ImagenProductoService.createImage(formData)
             .then((response) => {
-              console.log(response);
               setError(response.error);
-              //Respuesta al usuario de creación
               if (response.data != null) {
                 toast.success("Producto registrado con Imagen", {
                   duration: 4000,
                   position: "top-center",
                 });
-                // Redireccion a la tabla
                 return navigate("/producto-table");
               }
             })
@@ -129,20 +118,26 @@ export function CrearProducto() {
               if (error instanceof SyntaxError) {
                 console.log(error);
                 setError(error);
-                throw new Error("Respuesta no válida del servidor");
+                throw new Error('Respuesta no válida del servidor');
               }
+
             });
-        
+
+          })
+          .catch((error) => {
+            setError(error);
+            throw new Error("Respuesta no válida del servidor");
+          });
+
+       
       }
     } catch (error) {
       console.error(error);
     }
   };
 
-  // Listas de categorias y tipos
   const [loadedCategorias, setLoadedCategorias] = useState(false);
   const [dataCategorias, setDataCategorias] = useState([]);
-
   useEffect(() => {
     const categorias = [
       { id: 1, nombre: "Entrada" },
@@ -151,53 +146,50 @@ export function CrearProducto() {
       { id: 4, nombre: "Bebida" },
       { id: 5, nombre: "Sopa" },
     ];
-
     setDataCategorias(categorias);
     setLoadedCategorias(true);
   }, []);
 
   const [loadedTipos, setLoadedTipos] = useState(false);
   const [dataTipos, setDataTipos] = useState([]);
-
   useEffect(() => {
     const tipos = [
       { id: 1, nombre: "Japones" },
       { id: 2, nombre: "Chino" },
       { id: 3, nombre: "Coreano" },
     ];
-
     setDataTipos(tipos);
     setLoadedTipos(true);
   }, []);
 
-  // Lista de Estaciones
   const [dataEstaciones, setDataEstaciones] = useState({});
   const [loadedEstaciones, setLoadedEstaciones] = useState(false);
-
   useEffect(() => {
     EstacionServices.getEstaciones()
       .then((response) => {
-        console.log(response);
         setDataEstaciones(response.data);
         setLoadedEstaciones(true);
       })
       .catch((error) => {
-        if (error instanceof SyntaxError) {
-          console.log(error);
-          setError(error);
-          setLoadedEstaciones(false);
-          throw new Error("Respuesta no válida del servidor");
-        }
+        setError(error);
+        setLoadedEstaciones(false);
+        throw new Error("Respuesta no válida del servidor");
       });
   }, []);
 
   if (error) return <p>Error: {error.message}</p>;
+  
 
   return (
     <form onSubmit={handleSubmit(onSubmit, onError)} noValidate>
-      <Grid container spacing={2} sx={{ padding: 2 }}>
+      <Grid container spacing={1} sx={{ padding: 10 }}>
         <Grid item xs={12}>
-          <Typography variant="h4" align="center" gutterBottom>
+          <Typography
+            variant="h4"
+            align="center"
+            gutterBottom
+            sx={{ marginBottom: 3 }}
+          >
             <img
               src="https://png.pngtree.com/png-clipart/20210502/original/pngtree-pink-cartoon-cherry-flower-petal-png-image_6266152.png" // Reemplaza esta URL con la de una flor de cerezo
               alt="Flor de Cerezo"
@@ -224,8 +216,9 @@ export function CrearProducto() {
           </Typography>
         </Grid>
 
+        {/* Sección Izquierda - Campos */}
         <Grid item xs={12} sm={6}>
-          <FormControl variant="standard" fullWidth>
+          <FormControl fullWidth>
             <Controller
               name="nombre"
               control={control}
@@ -234,15 +227,13 @@ export function CrearProducto() {
                   {...field}
                   label="Nombre"
                   error={Boolean(errors.nombre)}
-                  helperText={errors.nombre ? errors.nombre.message : " "}
+                  helperText={errors.nombre?.message}
                 />
               )}
             />
           </FormControl>
-        </Grid>
 
-        <Grid item xs={12} sm={6}>
-          <FormControl variant="outlined" fullWidth>
+          <FormControl fullWidth sx={{ mt: 2 }}>
             <Controller
               name="precio"
               control={control}
@@ -252,15 +243,13 @@ export function CrearProducto() {
                   label="Precio"
                   type="number"
                   error={Boolean(errors.precio)}
-                  helperText={errors.precio ? errors.precio.message : " "}
+                  helperText={errors.precio?.message}
                 />
               )}
             />
           </FormControl>
-        </Grid>
 
-        <Grid item xs={12}>
-          <FormControl variant="outlined" fullWidth>
+          <FormControl fullWidth sx={{ mt: 2 }}>
             <Controller
               name="descripcion"
               control={control}
@@ -276,14 +265,8 @@ export function CrearProducto() {
               )}
             />
           </FormControl>
-        </Grid>
 
-        <Grid item xs={12} sm={6}>
-          <FormControl
-            variant="outlined"
-            fullWidth
-            error={Boolean(errors.categoria)}
-          >
+          <FormControl fullWidth sx={{ mt: 2 }}>
             {loadedCategorias && (
               <Controller
                 name="categoria"
@@ -302,18 +285,12 @@ export function CrearProducto() {
                 )}
               />
             )}
-            <FormHelperText>
-              {errors.categoria ? errors.categoria.message : " "}
+            <FormHelperText sx={{ color: "#d32f2f" }}>
+              {errors.categoria?.message}
             </FormHelperText>
           </FormControl>
-        </Grid>
 
-        <Grid item xs={12} sm={6}>
-          <FormControl
-            variant="outlined"
-            fullWidth
-            error={Boolean(errors.tipo)}
-          >
+          <FormControl fullWidth sx={{ mt: 2 }}>
             {loadedTipos && (
               <Controller
                 name="tipo"
@@ -332,18 +309,12 @@ export function CrearProducto() {
                 )}
               />
             )}
-            <FormHelperText>
-              {errors.tipo ? errors.tipo.message : " "}
+            <FormHelperText sx={{ color: "#d32f2f" }}>
+              {errors.tipo?.message}
             </FormHelperText>
           </FormControl>
-        </Grid>
 
-        <Grid item xs={12}>
-          <FormControl
-            variant="outlined"
-            fullWidth
-            error={Boolean(errors.estaciones)}
-          >
+          <FormControl fullWidth sx={{ mt: 2 }}>
             {loadedEstaciones && (
               <Controller
                 name="estaciones"
@@ -354,67 +325,93 @@ export function CrearProducto() {
               />
             )}
             <FormHelperText sx={{ color: "#d32f2f" }}>
-              {errors.estaciones ? errors.estaciones.message : " "}
+              {" "}
+              {errors.estaciones?.message}
             </FormHelperText>
           </FormControl>
         </Grid>
 
-        <Grid item xs={12}>
+        {/* Sección Derecha - Imagen */}
+        <Grid
+          item
+          xs={12}
+          sm={6}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
           <FormControl variant="standard" fullWidth sx={{ m: 1 }}>
             <Controller
               name="image"
               control={control}
               render={({ field }) => (
-                <input
-                  type="file"
-                  accept="image/*"
-                  {...field}
-                  onChange={handleChange}
-                  style={{ display: "none" }}
-                  id="file-upload"
-                />
+                <>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      field.onChange(e.target.files[0]); // Cambia el valor del controlador
+                      handleChange(e); // Llama a tu función de manejo de archivo
+                    }}
+                    style={{ display: "none" }}
+                    id="file-upload"
+                  />
+                  <label htmlFor="file-upload">
+                    <Button
+                      variant="outlined"
+                      component="span"
+                      sx={{
+                        textAlign: "center",
+                        display: "block", // Cambia a bloque para ocupar el espacio completo
+                        width: "30%", // O ajusta el ancho según tus necesidades
+                        height: "40px",
+                        margin: "0 auto", // Centra el botón horizontalmente
+                      }}
+                    >
+                      Subir Imagen
+                    </Button>
+                  </label>
+                </>
               )}
             />
-            <label htmlFor="file-upload">
-              <Button
-                variant="outlined"
-                component="span"
-                sx={{ width: "100%", height: "50px" }}
-              >
-                Subir Imagen
-              </Button>
-            </label>
             <FormHelperText sx={{ color: "#d32f2f" }}>
-              {errors.image ? errors.image.message : " "}{" "}
-              {/* Mensaje de error para imagen */}
+              {errors.image ? errors.image.message : " "}
             </FormHelperText>
           </FormControl>
-          {fileURL && (
-            <div style={{ marginTop: "10px", textAlign: "center" }}>
+
+          <div
+            style={{
+              width: "60%",
+              height: "200px",
+              border: fileURL ? "1px solid #000" : "2px dashed red",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginTop: "10px",
+              color: errors.image ? "red" : "black",
+            }}
+          >
+            {fileURL ? (
               <img
                 src={fileURL}
-                width="300"
-                alt="Imagen del producto"
-                style={{
-                  border: "2px solid #E96C12", // Color del borde
-                  borderRadius: "8px", // Bordes redondeados
-                  boxShadow: "0 2px 10px rgba(0, 0, 0, 0.2)", // Sombra para profundidad
-                  objectFit: "cover", // Asegura que la imagen se ajuste bien
-                }}
+                alt="Preview"
+                style={{ maxHeight: "100%", maxWidth: "100%" }}
               />
-            </div>
-          )}
+            ) : (
+              <Typography>
+                {errors.image
+                  ? errors.image.message
+                  : "Vista previa de la imagen"}
+              </Typography>
+            )}
+          </div>
         </Grid>
 
         <Grid item xs={2}>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ padding: 1, fontSize: "1.0rem" }}
-          >
-            Guardar
+          <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>
+            Crear Producto
           </Button>
         </Grid>
       </Grid>

@@ -1,44 +1,82 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { useEffect, useState } from "react";
 import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import { FormHelperText } from "@mui/material";
-import { useForm, Controller, useFieldArray } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
+import { FormHelperText, MenuItem, Select } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
-import AddIcon from "@mui/icons-material/Add";
-import Tooltip from "@mui/material/Tooltip";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useNavigate, useParams } from "react-router-dom";
-import ProductoService from "../../Services/ProductoServices";
 import { toast } from "react-hot-toast";
-import { EstacionesForm } from "./Form/EstacionesForm";
+import ProductoService from "../../Services/ProductoServices";
+import ImagenProductoService from "../../Services/ImagenProductoServices";
+import { SelectEstacion } from "./Form/SelectEstacion";
 import EstacionServices from "../../Services/EstacionServices";
 
 export function ActualizarProducto() {
+  //Url para acceder a la imagenes guardadas en el API
   const navigate = useNavigate();
   const routeParams = useParams();
+  let formData = new FormData();
+  const BASE_URL = import.meta.env.VITE_BASE_URL + "uploads";
+
+  //Id de la pelicula a actualizar
   const id = routeParams.id || null;
+
+  //Valores a precargar en el formulario, vienen del API
   const [values, setValores] = useState(null);
-  const [dataEstaciones, setDataEstaciones] = useState([]);
-  const [loadedEstaciones, setLoadedEstaciones] = useState(false);
-  const [error, setError] = useState("");
+  const [nombreImagen, setNombreImagen] = useState("");
 
+  useEffect(() => {
+    if (id !== undefined && !isNaN(Number(id))) {
+      ProductoService.getProductoById(id)
+        .then((response) => {
+          console.log(response.data);
+          console.log(response.data.imagen)
+          setError(response.error);
+          
+          // Asegurar que "nombreImagen" sea un string
+          setNombreImagen(String(response.data.imagen));
+          console.log("Imagen puesta: " + nombreImagen);
+
+          // Verificar si "estaciones" es un array antes de mapearlo
+          const estaciones = Array.isArray(response.data.estaciones)
+            ? response.data.estaciones.map((item) => item.id)
+            : [];
+          response.data.estaciones = estaciones;
+
+          setValores(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+          setError(error);
+          throw new Error("Respuesta no válida del servidor");
+        });
+    }
+  }, [id]);
+
+
+  // Esquema de validación
   const ProductoSchema = yup.object({
-    nombre: yup.string().required("El nombre del producto es requerido").min(2, "El nombre del producto debe tener al menos 2 caracteres"),
-    descripcion: yup.string().required("La descripción es requerida"),
-    precio: yup.number().typeError("Solo se aceptan números").required("El precio es requerido").positive("Solo se aceptan números positivos"),
+    nombre: yup
+      .string()
+      .required("El nombre del producto es requerido")
+      .min(4, "El nombre del producto debe tener al menos 4 caracteres"),
+    descripcion: yup
+      .string()
+      .required("La descripción del producto es requerida"),
+    precio: yup
+      .number()
+      .typeError("Solo se aceptan números")
+      .required("El precio es requerido")
+      .positive("Solo se aceptan números positivos"),
     tipo: yup.string().required("El tipo de comida es requerido"),
-    categoria: yup.string().required("La categoría es requerida"),
-    estaciones: yup.array().of(
-      yup.object().shape({
-        id: yup.string().required("La estación es requerida"),
-      })
-    ).min(1, "Se requiere al menos una estación"),
+    categoria: yup.string().required("La categoría del comida es requerida"),
+    estaciones: yup.array().min(1, "La estación es requerida"),
   });
-
   const {
     control,
     handleSubmit,
@@ -51,189 +89,396 @@ export function ActualizarProducto() {
       descripcion: "",
       tipo: "",
       categoria: "",
-      estaciones: [{ id: ""}],
+      image: "",
+      estaciones: [],
     },
+    //Valores a precargar en el formulario
+    values,
+    // Asignación de validaciones
     resolver: yupResolver(ProductoSchema),
   });
 
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "estaciones",
-  });
+  const [error, setError] = useState("");
 
-  const removeEstacion = (index) => {
-    if (fields.length > 1) {
-      remove(index);
-    }
-  };
+  // Accion submit
+  const onSubmit = (DataForm) => {
+    console.log("Formulario:");
+    console.log(DataForm);
 
-  const addNewEstacion = () => {
-    append({id: ""});
-  };
-
-  const onSubmit = async (dataForm) => {
-    console.log("Formulario:", dataForm);
     try {
-      const response = await ProductoService.updateProducto(dataForm);
-      if (response.data) {
-        toast.success(`Producto actualizado #${response.data.id} - ${response.data.nombre}`, { duration: 4000, position: "top-center" });
-        navigate("/producto-table");
+      if (ProductoSchema.isValid()) {
+        //Actualizar producto
+        ProductoService.updateProducto(DataForm)
+          .then((response) => {
+            console.log(response);
+            setError(response.error);
+
+            //Respuesta al usuario de creación
+            if (response.data != null) {
+              toast.success(
+                `Producto actualizada #:${response.data.id} - ${response.data.nombre}`,
+                {
+                  duration: 4000,
+                  position: "top-center",
+                }
+              );
+            }
+
+            console.log("Contenido de formData:", formData);
+
+            if (file && file.size > 0) {
+              formData.append("file", file); // Imagen
+              formData.append("nombre", DataForm.nombre);
+              console.log("Contenido de formData:", formData);
+
+              ImagenProductoService.createImage(formData)
+                .then((response) => {
+                  setError(response.error);
+                  if (response.data != null) {
+                    toast.success("Producto actulizado con Imagen", {
+                      duration: 4000,
+                      position: "top-center",
+                    });
+                    return navigate("/producto-table");
+                  }
+                })
+                .catch((error) => {
+                  if (error instanceof SyntaxError) {
+                    console.log(error);
+                    setError(error);
+                    throw new Error("Respuesta no válida del servidor");
+                  }
+                });
+            }
+
+            // Redireccion a la tabla
+            return navigate("/producto-table");
+          })
+          .catch((error) => {
+            if (error instanceof SyntaxError) {
+              console.log(error);
+              setError(error);
+              throw new Error("Respuesta no válida del servidor");
+            }
+          });
       }
-    } catch (error) {
-      console.error("Error:", error);
-      setError("Ocurrió un error al actualizar el producto.");
+    } catch (e) {
+      //Capturar error
+      console.error(e);
     }
   };
 
-  const onError = (errors) => console.log(errors);
+  // Si ocurre error al realizar el submit
+  const onError = (errors, e) => console.log(errors, e);
 
+  //Lista de categorias
+  const [loadedCategorias, setLoadedCategorias] = useState(false);
+  const [dataCategorias, setDataCategorias] = useState([]);
   useEffect(() => {
-    const fetchEstaciones = async () => {
-      try {
-        const response = await EstacionServices.getEstaciones();
-        setDataEstaciones(response.data);
-        setLoadedEstaciones(true);
-      } catch (error) {
-        console.error("Error:", error);
-        setError("No se pudo cargar las estaciones.");
-      }
-    };
-    fetchEstaciones();
+    const categorias = [
+      { id: 1, nombre: "Entrada" },
+      { id: 2, nombre: "Principal" },
+      { id: 3, nombre: "Postre" },
+      { id: 4, nombre: "Bebida" },
+      { id: 5, nombre: "Sopa" },
+    ];
+    setDataCategorias(categorias);
+    setLoadedCategorias(true);
   }, []);
 
-  if (error) return <p>Error: {error}</p>;
+  //Lista de tipos de categoria
+  const [loadedTipos, setLoadedTipos] = useState(false);
+  const [dataTipos, setDataTipos] = useState([]);
+  useEffect(() => {
+    const tipos = [
+      { id: 1, nombre: "Japones" },
+      { id: 2, nombre: "Chino" },
+      { id: 3, nombre: "Coreano" },
+    ];
+    setDataTipos(tipos);
+    setLoadedTipos(true);
+  }, []);
+
+  //Lista de tipos de estaciones
+  const [dataEstaciones, setDataEstaciones] = useState({});
+  const [loadedEstaciones, setLoadedEstaciones] = useState(false);
+  useEffect(() => {
+    EstacionServices.getEstaciones()
+      .then((response) => {
+        console.log(response);
+        setDataEstaciones(response.data);
+        setLoadedEstaciones(true);
+      })
+      .catch((error) => {
+        console.log(error);
+        setError(error);
+        setLoadedEstaciones(false);
+        throw new Error("Respuesta no válida del servidor");
+      });
+  }, []);
+
+  const [file, setFile] = useState(null);
+  const [fileURL, setFileURL] = useState(null);
+
+  function handleChange(e) {
+    if (e.target.files) {
+      setFileURL(
+        URL.createObjectURL(e.target.files[0], e.target.files[0].name)
+      );
+      setFile(e.target.files[0], e.target.files[0].name);
+    }
+  }
+
+  if (error) return <p>Error: {error.message}</p>;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit, onError)} noValidate>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <Typography variant="h5" gutterBottom>
-            Actualizar Producto
-          </Typography>
-        </Grid>
-
-        <Grid item xs={12} sm={4}>
-          <FormControl variant="outlined" fullWidth>
-            <Controller
-              name="nombre"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Nombre"
-                  error={Boolean(errors.nombre)}
-                  helperText={errors.nombre?.message}
-                />
-              )}
-            />
-          </FormControl>
-        </Grid>
-
-        <Grid item xs={12} sm={4}>
-          <FormControl variant="outlined" fullWidth>
-            <Controller
-              name="precio"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Precio"
-                  error={Boolean(errors.precio)}
-                  helperText={errors.precio?.message}
-                  type="number"
-                />
-              )}
-            />
-          </FormControl>
-        </Grid>
-
-        <Grid item xs={12} sm={4}>
-          <FormControl variant="outlined" fullWidth>
-            <Controller
-              name="descripcion"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Descripción"
-                  error={Boolean(errors.descripcion)}
-                  helperText={errors.descripcion?.message}
-                />
-              )}
-            />
-          </FormControl>
-        </Grid>
-
-        <Grid item xs={12} sm={4}>
-          <FormControl variant="outlined" fullWidth>
-            <Controller
-              name="categoria"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="categoria"
-                  error={Boolean(errors.categoria)}
-                  helperText={errors.categoria?.message}
-                />
-              )}
-            />
-          </FormControl>
-        </Grid>
-
-
-        <Grid item xs={12} sm={4}>
-          <FormControl variant="outlined" fullWidth>
-            <Controller
-              name="tipo"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Tipo de comida"
-                  error={Boolean(errors.tipo)}
-                  helperText={errors.tipo?.message}
-                />
-              )}
-            />
-          </FormControl>
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <FormControl fullWidth>
-            <Typography variant="h6" gutterBottom>
-              Estaciones
-              <Tooltip title="Agregar Estaciones">
-                <span>
-                  <IconButton color="primary" onClick={addNewEstacion}>
-                    <AddIcon />
-                  </IconButton>
-                </span>
-              </Tooltip>
+    <>
+      <form onSubmit={handleSubmit(onSubmit, onError)} noValidate>
+        <Grid container spacing={1} sx={{ padding: 10 }}>
+          <Grid item xs={12}>
+            <Typography
+              variant="h4"
+              align="center"
+              gutterBottom
+              sx={{ marginBottom: 3 }}
+            >
+              <img
+                src="https://png.pngtree.com/png-clipart/20210502/original/pngtree-pink-cartoon-cherry-flower-petal-png-image_6266152.png" // Reemplaza esta URL con la de una flor de cerezo
+                alt="Flor de Cerezo"
+                style={{
+                  width: "20px",
+                  height: "auto",
+                  display: "inline-block",
+                  marginRight: "10px",
+                  marginLeft: "10px",
+                }}
+              />
+              Actualizar Producto
+              <img
+                src="https://png.pngtree.com/png-clipart/20210502/original/pngtree-pink-cartoon-cherry-flower-petal-png-image_6266152.png" // Reemplaza esta URL con la de una flor de cerezo
+                alt="Flor de Cerezo"
+                style={{
+                  width: "20px",
+                  height: "auto",
+                  display: "inline-block",
+                  marginRight: "10px",
+                  marginLeft: "10px",
+                }}
+              />
             </Typography>
-            {loadedEstaciones &&
-              fields.map((field, index) => (
-                <EstacionesForm
-                  key={field.id}
-                  field={field}
-                  data={dataEstaciones}
-                  index={index}
-                  onRemove={removeEstacion}
-                  control={control}
-                />
-              ))}
-            <FormHelperText sx={{ color: "error.main" }}>
-              {errors.estaciones ? errors.estaciones.message : " "}
-            </FormHelperText>
-          </FormControl>
-        </Grid>
+          </Grid>
 
-        <Grid item xs={12}>
-          <Button type="submit" variant="contained" color="secondary">
-            Guardar
-          </Button>
+          {/* Sección Izquierda - Campos */}
+          <Grid item xs={12} sm={6}>
+            <FormControl variant="standard" fullWidth>
+              <Controller
+                name="nombre"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    id="nombre"
+                    label="Nombre"
+                    error={Boolean(errors.nombre)}
+                    helperText={errors.nombre?.message}
+                  />
+                )}
+              />
+            </FormControl>
+
+            <FormControl variant="standard" fullWidth sx={{ mt: 2 }}>
+              <Controller
+                name="precio"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    id="precio"
+                    label="Precio"
+                    type="number"
+                    error={Boolean(errors.precio)}
+                    helperText={errors.precio?.message}
+                  />
+                )}
+              />
+            </FormControl>
+
+            <FormControl variant="standard" fullWidth sx={{ mt: 2 }}>
+              <Controller
+                name="descripcion"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    id="discripcion"
+                    label="Descripción"
+                    multiline
+                    rows={4}
+                    error={Boolean(errors.descripcion)}
+                    helperText={errors.descripcion?.message}
+                  />
+                )}
+              />
+            </FormControl>
+
+            <FormControl fullWidth sx={{ mt: 2 }}>
+              {loadedCategorias && (
+                <Controller
+                  name="categoria"
+                  control={control}
+                  render={({ field }) => (
+                    <Select {...field} displayEmpty>
+                      <MenuItem value="" disabled>
+                        Selecciona una categoría
+                      </MenuItem>
+                      {dataCategorias.map((categoria) => (
+                        <MenuItem key={categoria.id} value={categoria.nombre}>
+                          {categoria.nombre}
+                        </MenuItem>
+                      ))}
+                      onChange=
+                      {(e) =>
+                        setValue("categoria", e.target.value, {
+                          shouldValidate: true,
+                        })
+                      }
+                    </Select>
+                  )}
+                />
+              )}
+              <FormHelperText sx={{ color: "#d32f2f" }}>
+                {errors.categoria?.message}
+              </FormHelperText>
+            </FormControl>
+
+            <FormControl fullWidth sx={{ mt: 2 }}>
+              {loadedEstaciones && (
+                <Controller
+                  name="estaciones"
+                  control={control}
+                  render={({ field }) => (
+                    <SelectEstacion field={field} data={dataEstaciones} />
+                  )}
+                />
+              )}
+              <FormHelperText sx={{ color: "#d32f2f" }}>
+                {" "}
+                {errors.estaciones?.message}
+              </FormHelperText>
+            </FormControl>
+
+            <FormControl fullWidth sx={{ mt: 2 }}>
+              {loadedTipos && (
+                <Controller
+                  name="tipo"
+                  control={control}
+                  render={({ field }) => (
+                    <Select {...field} displayEmpty>
+                      <MenuItem value="" disabled>
+                        Selecciona un tipo de comida
+                      </MenuItem>
+                      {dataTipos.map((tipo) => (
+                        <MenuItem key={tipo.id} value={tipo.nombre}>
+                          {tipo.nombre}
+                        </MenuItem>
+                      ))}
+                      onChange=
+                      {(e) =>
+                        setValue("tipo", e.target.value, {
+                          shouldValidate: true,
+                        })
+                      }
+                    </Select>
+                  )}
+                />
+              )}
+              <FormHelperText sx={{ color: "#d32f2f" }}>
+                {errors.tipo?.message}
+              </FormHelperText>
+            </FormControl>
+          </Grid>
+
+          {/* Sección Derecha - Imagen */}
+          <Grid
+            item
+            xs={12}
+            sm={6}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <FormControl variant="standard" fullWidth sx={{ m: 1 }}>
+              <Controller
+                name="image"
+                control={control}
+                render={({ field }) => (
+                  <>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        field.onChange(e.target.files[0]); // Cambia el valor del controlador
+                        handleChange(e); // Llama a tu función de manejo de archivo
+                      }}
+                      style={{ display: "none" }}
+                      id="file-upload"
+                    />
+                    <label htmlFor="file-upload">
+                      <Button
+                        variant="outlined"
+                        component="span"
+                        sx={{
+                          textAlign: "center",
+                          display: "block", // Cambia a bloque para ocupar el espacio completo
+                          width: "30%", // O ajusta el ancho según tus necesidades
+                          height: "40px",
+                          margin: "0 auto", // Centra el botón horizontalmente
+                        }}
+                      >
+                        Subir Imagen
+                      </Button>
+                    </label>
+                  </>
+                )}
+              />
+              <FormHelperText sx={{ color: "#d32f2f" }}>
+                {errors.image ? errors.image.message : " "}
+              </FormHelperText>
+            </FormControl>
+
+            <div
+              style={{
+                width: "60%",
+                height: "200px",
+                border: fileURL ? "1px solid #000" : "2px dashed red",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: "10px",
+                color: errors.image ? "red" : "black",
+              }}
+            >
+              <img
+                src={fileURL ? fileURL : `${BASE_URL}/${nombreImagen}`}
+                alt="Preview"
+                style={{ maxHeight: "100%", maxWidth: "100%" }}
+              />
+
+              <Typography>
+                {errors.image ? errors.image.message : ""}
+              </Typography>
+            </div>
+          </Grid>
+
+          <Grid item xs={2}>
+            <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>
+              Actualizar Producto
+            </Button>
+          </Grid>
         </Grid>
-      </Grid>
-    </form>
+      </form>
+    </>
   );
 }

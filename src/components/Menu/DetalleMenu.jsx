@@ -10,6 +10,7 @@ import InfoIcon from "@mui/icons-material/Info";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useParams } from 'react-router-dom';
 import MenuServices from "../../Services/MenuServices";
 
 const theme = createTheme({
@@ -25,17 +26,18 @@ const theme = createTheme({
   },
 });
 
-export function MenuActual() {
+export function DetalleMenu() {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
   const [loaded, setLoaded] = useState(false);
+  const routeParams = useParams();
   
   //Url para acceder a la imagenes guardadas en el API
 const BASE_URL = import.meta.env.VITE_BASE_URL + 'uploads';
 
   // Llamar al API y obtener la lista de productos y combos
   useEffect(() => {
-    MenuServices.getMenuActual()
+    MenuServices.getMenuById(routeParams.id)
       .then((response) => {
         setData(response.data);
         setError(response.error);

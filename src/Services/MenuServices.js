@@ -16,6 +16,20 @@ class MenuService {
   getMenuActual() {
     return axios.get(BASE_URL + "/" + "getMenuActual");
   }
+
+  // http://localhost:81/SatoriAsianCuisine/menu
+  updateMenu(Menu) {
+    return axios({
+      method: "put",
+      url: BASE_URL,
+      data: JSON.stringify(Menu),
+    });
+  }
+
+  // http://localhost:81/SatoriAsianCuisine/menu
+  createMenu(Menu) {
+    return axios.post(BASE_URL, JSON.stringify(Menu));
+  }
 }
 
 export default new MenuService();

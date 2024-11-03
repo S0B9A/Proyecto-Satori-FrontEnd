@@ -35,8 +35,7 @@ export function Mantenimiento() {
   const cards = [
     { id: 1, title: "Mantenimiento de Productos", buttonLabel: "Gestionar Productos", link: `/producto-table` },
     { id: 2, title: "Mantenimiento de Combos", buttonLabel: "Gestionar Combos", link: `/combo-table` },
-    { id: 3, title: "Mantenimiento del Menú", buttonLabel: "Gestionar Menú", link: `/menu` },
-    { id: 4, title: "Mantenimiento de Estaciones", buttonLabel: "Gestionar Estaciones", link: `/estaciones` },
+    { id: 3, title: "Mantenimiento del Menú", buttonLabel: "Gestionar Menú", link: `/menu-table` },
   ];
 
   return (

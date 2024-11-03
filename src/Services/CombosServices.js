@@ -12,7 +12,20 @@ class CombosService {
     return axios.get(BASE_URL + "/" + ComboId);
   }
 
-  
+   // http://localhost:81/SatoriAsianCuisine/combo
+   updateCombo(Combo) {
+    return axios({
+      method: 'put',
+      url: BASE_URL,
+      data: JSON.stringify(Combo)
+
+    })
+  }
+
+  // http://localhost:81/SatoriAsianCuisine/combo
+  createCombo(combo) {
+    return axios.post(BASE_URL, JSON.stringify(combo));
+  }
 }
 
 export default new CombosService();

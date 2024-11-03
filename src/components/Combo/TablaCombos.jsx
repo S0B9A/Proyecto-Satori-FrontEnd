@@ -27,6 +27,7 @@ import ProductoService from '../../Services/ProductoServices';
 import EditIcon from '@mui/icons-material/Edit';
 import { useNavigate, Link } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
+import CombosServices from '../../Services/CombosServices';
 
 // Ordenar descendente
 function descendingComparator(a, b, orderBy) {
@@ -79,16 +80,10 @@ const headCells = [
         disablePadding: false,
         label: 'Precio',
     },
-    {
-        id: 'CanntidadProcesos',
-        numeric: false,
-        disablePadding: false,
-        label: 'Cantidad de procesos',
-    },
 ];
 
 // Encabezado tabla
-function TablaProductosHead(props) {
+function TablaCombosHead(props) {
     const { order, orderBy, numSelected, rowCount, onRequestSort } = props;
     const createSortHandler = (property) => (event) => {
         onRequestSort(event, property);
@@ -99,7 +94,7 @@ function TablaProductosHead(props) {
             <TableRow>
                 <TableCell>
                     <Tooltip title="Crear">
-                        <IconButton component={Link} to="/producto/Crear/">
+                        <IconButton component={Link} to="/combo/Crear/">
                             <AddIcon />
                         </IconButton>
                     </Tooltip>
@@ -131,7 +126,7 @@ function TablaProductosHead(props) {
 }
 
 // Propiedades Encabezado tabla
-TablaProductosHead.propTypes = {
+TablaCombosHead.propTypes = {
     numSelected: PropTypes.number.isRequired,
     onRequestSort: PropTypes.func.isRequired,
     order: PropTypes.oneOf(['asc', 'desc']).isRequired,
@@ -140,13 +135,13 @@ TablaProductosHead.propTypes = {
 };
 
 // Barra de opciones
-function TablaProductosToolbar(props) {
+function TablaCombosToolbar(props) {
     const { numSelected, idSelected } = props;
     const navigate = useNavigate();
 
     const update = () => {
         if (idSelected) {
-            navigate(`/producto/update/${idSelected}`);
+            navigate(`/combo/update/${idSelected}`);
         }
     };
 
@@ -177,7 +172,7 @@ function TablaProductosToolbar(props) {
                     id="tableTitle"
                     component="div"
                 >
-                    Mantenimiento de Productos
+                    Mantenimiento de Combos
                 </Typography>
             )}
 
@@ -206,7 +201,7 @@ function TablaProductosToolbar(props) {
 }
 
 // Propiedades Barra de opciones
-TablaProductosToolbar.propTypes = {
+TablaCombosToolbar.propTypes = {
     numSelected: PropTypes.number.isRequired,
     idSelected: PropTypes.number.isRequired,
 };
@@ -226,7 +221,7 @@ export default function TablaProductos() {
 
     // Obtener lista del API
     useEffect(() => {
-        ProductoService.getProductos()
+        CombosServices.getCombos()
             .then((response) => {
                 setData(response.data || []); // Asignar array vacío si no hay datos
                 setError(response.error);
@@ -273,7 +268,7 @@ export default function TablaProductos() {
             {data && data.length > 0 && (
                 <Box sx={{ width: '100%' }}>
                     <Paper sx={{ width: '100%', mb: 2 }}>
-                        <TablaProductosToolbar
+                        <TablaCombosToolbar
                             numSelected={selected.length}
                             idSelected={Number(selected[0]) || 0}
                         />
@@ -283,7 +278,7 @@ export default function TablaProductos() {
                                 aria-labelledby="tableTitle"
                                 size={dense ? 'small' : 'medium'}
                             >
-                                <TablaProductosHead
+                                <TablaCombosHead
                                     numSelected={selected.length}
                                     order={order}
                                     orderBy={orderBy}
@@ -321,7 +316,6 @@ export default function TablaProductos() {
                                                     </TableCell>
                                                     <TableCell>{row.descripcion}</TableCell>
                                                     <TableCell>{row.precio}</TableCell>
-                                                    <TableCell>{row.CantidadEstaciones.total_estaciones}</TableCell>
                                                 </TableRow>
                                             );
                                         })}

@@ -57,9 +57,9 @@ const NAVIGATION = [
     icon: <PlaceIcon />, // Icono para Nuestras Estaciones
   },
   {
-    segment: 'producto-table',
-    title: 'Mantenimiento de productos',
-    icon: <BuildIcon />, // Icono para Nuestras Estaciones
+    segment: 'mantenimiento',
+    title: 'Mantenimiento',
+    icon: <BuildIcon />, // Icono para mantenimiento
   },
 
 ];

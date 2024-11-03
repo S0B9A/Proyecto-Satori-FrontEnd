@@ -33,6 +33,7 @@ export function ListaCombos() {
   const [error, setError] = useState("");
   //Booleano para establecer sí se ha recibido respuesta
   const [loaded, setLoaded] = useState(false);
+  const BASE_URL = import.meta.env.VITE_BASE_URL + 'uploads';
 
   //Llamar al API y obtener la lista de productos
   useEffect(() => {
@@ -110,7 +111,7 @@ export function ListaCombos() {
                 <CardMedia
                   component="img"
                   sx={{ width: 150, borderRadius: "10px", margin: "10px" }} // Mantener imagen rectangular
-                  image={combo.imagen}
+                  image={`${BASE_URL}/${combo.imagen}`}
                   alt={combo.nombre}
                 />
                 <CardContent

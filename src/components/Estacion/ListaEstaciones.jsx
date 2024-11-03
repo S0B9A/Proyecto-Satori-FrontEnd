@@ -33,6 +33,7 @@ export function ListaEstaciones() {
    const [error, setError] = useState("");
    //Booleano para establecer sí se ha recibido respuesta
    const [loaded, setLoaded] = useState(false);
+   const BASE_URL = import.meta.env.VITE_BASE_URL + 'uploads';
  
    //Llamar al API y obtener la lista de productos
    useEffect(() => {
@@ -109,7 +110,7 @@ export function ListaEstaciones() {
                     estacion.productos.map((producto) => (
                       <div key={producto.id} style={{ display: 'flex', marginBottom: '10px' }}>
                         <img
-                          src={producto.imagen}
+                          src={`${BASE_URL}/${producto.imagen}`}
                           alt={producto.nombre}
                           style={{
                             width: '100px',

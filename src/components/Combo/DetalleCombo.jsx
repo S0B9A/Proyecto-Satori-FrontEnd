@@ -51,7 +51,7 @@ export function DetalleCombo() {
           <Grid item xs={12} md={6}>
             <CardMedia
               component="img"
-              image={data.imagen || 'https://via.placeholder.com/300'} // Placeholder si no hay imagen
+              image={`${BASE_URL}/${data.imagen}`} // Placeholder si no hay imagen
               alt={data.nombre}
               sx={{ borderRadius: '10px', height: '300px', objectFit: 'cover' }}
             />
@@ -87,7 +87,7 @@ export function DetalleCombo() {
                       <Typography variant="body2">{producto.descripcion}</Typography>
                       <Typography variant="body2" sx={{ color: '#FF9800' }}>Precio: ${producto.precio}</Typography>
                       <img
-                        src={producto.imagen}
+                        src={`${BASE_URL}/${producto.imagen}`}
                         alt={producto.nombre}
                         style={{ width: '100px', height: 'auto', borderRadius: '5px', marginTop: '10px' }}
                       />

@@ -15,7 +15,6 @@ import { toast } from "react-hot-toast";
 import { SelectEstacion } from "./Form/SelectEstacion";
 import EstacionServices from "../../Services/EstacionServices";
 
-
 export function CrearProducto() {
   const navigate = useNavigate();
   let formData = new FormData();
@@ -70,7 +69,6 @@ export function CrearProducto() {
     resolver: yupResolver(ProductoSchema),
   });
 
-
   const [file, setFile] = useState(null);
   const [fileURL, setFileURL] = useState(null);
 
@@ -83,16 +81,32 @@ export function CrearProducto() {
     }
   }
 
-   //Gestión de errores
-   const [error, setError] = useState('');
-   // Si ocurre error al realizar el submit
-   const onError = (errors, e) => console.log(errors, e);
- 
+  //Gestión de errores
+  const [error, setError] = useState("");
+  // Si ocurre error al realizar el submit
+  const onError = (errors, e) => console.log(errors, e);
+
   const onSubmit = (DataForm) => {
     console.log("Formulario:", DataForm);
 
     try {
       if (ProductoSchema.isValid()) {
+
+        // Verificar si el producto "hamburguesa" ya existe
+        const productoExiste = dataProductos.some(
+          (producto) =>
+            producto.nombre.toLowerCase() === DataForm.nombre.toLowerCase()
+        );
+
+        if (productoExiste) {
+          console.log("El producto ya existe, saliendo de la función.");
+          toast.error("Ya existe un producto con ese nombre", {
+            duration: 4000,
+            position: "top-center",
+          });
+          return; // Salir de la función si el producto ya existe
+        }
+
         formData.append("file", file); // Imagen
         formData.append("nombre", DataForm.nombre);
 
@@ -104,32 +118,28 @@ export function CrearProducto() {
             console.log("Contenido de formData:", formData);
 
             ImagenProductoService.createImage(formData)
-            .then((response) => {
-              setError(response.error);
-              if (response.data != null) {
-                toast.success("Producto registrado con Imagen", {
-                  duration: 4000,
-                  position: "top-center",
-                });
-                return navigate("/producto-table");
-              }
-            })
-            .catch((error) => {
-              if (error instanceof SyntaxError) {
-                console.log(error);
-                setError(error);
-                throw new Error('Respuesta no válida del servidor');
-              }
-
-            });
-
+              .then((response) => {
+                setError(response.error);
+                if (response.data != null) {
+                  toast.success("Producto registrado con Imagen", {
+                    duration: 4000,
+                    position: "top-center",
+                  });
+                  return navigate("/producto-table");
+                }
+              })
+              .catch((error) => {
+                if (error instanceof SyntaxError) {
+                  console.log(error);
+                  setError(error);
+                  throw new Error("Respuesta no válida del servidor");
+                }
+              });
           })
           .catch((error) => {
             setError(error);
             throw new Error("Respuesta no válida del servidor");
           });
-
-       
       }
     } catch (error) {
       console.error(error);
@@ -177,8 +187,22 @@ export function CrearProducto() {
       });
   }, []);
 
+  const [dataProductos, setDataProductos] = useState({});
+  const [loadedProductos, setLoadedProductos] = useState(false);
+  useEffect(() => {
+    ProductoService.getProductos()
+      .then((response) => {
+        setDataProductos(response.data);
+        setLoadedProductos(true);
+      })
+      .catch((error) => {
+        setError(error);
+        setLoadedProductos(false);
+        throw new Error("Respuesta no válida del servidor");
+      });
+  }, []);
+
   if (error) return <p>Error: {error.message}</p>;
-  
 
   return (
     <form onSubmit={handleSubmit(onSubmit, onError)} noValidate>

@@ -14,7 +14,7 @@ import { toast } from "react-hot-toast";
 import { SelectProductos } from "./Form/SelectProductos";
 import ProductoServices from "../../Services/ProductoServices";
 import ImagenComboServices from "../../Services/ImagenComboServices";
-
+import CombosServices from "../../Services/CombosServices";
 
 export function CrearCombo() {
   const navigate = useNavigate();
@@ -26,9 +26,7 @@ export function CrearCombo() {
       .string()
       .required("El nombre del combo es requerido")
       .min(4, "El nombre del combo debe tener al menos 4 caracteres"),
-    descripcion: yup
-      .string()
-      .required("La descripción del combo es requerida"),
+    descripcion: yup.string().required("La descripción del combo es requerida"),
     precio: yup
       .number()
       .typeError("Solo se aceptan números")
@@ -68,7 +66,6 @@ export function CrearCombo() {
     resolver: yupResolver(ComboSchema),
   });
 
-
   const [file, setFile] = useState(null);
   const [fileURL, setFileURL] = useState(null);
 
@@ -81,16 +78,32 @@ export function CrearCombo() {
     }
   }
 
-   //Gestión de errores
-   const [error, setError] = useState('');
-   // Si ocurre error al realizar el submit
-   const onError = (errors, e) => console.log(errors, e);
- 
+  //Gestión de errores
+  const [error, setError] = useState("");
+  // Si ocurre error al realizar el submit
+  const onError = (errors, e) => console.log(errors, e);
+
   const onSubmit = (DataForm) => {
     console.log("Formulario:", DataForm);
 
     try {
       if (ComboSchema.isValid()) {
+
+        // Verificar si el producto "hamburguesa" ya existe
+        const comboExiste = dataCombos.some(
+          (combo) =>
+            combo.nombre.toLowerCase() === DataForm.nombre.toLowerCase()
+        );
+
+        if (comboExiste) {
+          console.log("El producto ya existe, saliendo de la función.");
+          toast.error("Ya existe un combo con ese nombre", {
+            duration: 4000,
+            position: "top-center",
+          });
+          return; // Salir de la función si el producto ya existe
+        }
+
         formData.append("file", file); // Imagen
         formData.append("nombre", DataForm.nombre);
 
@@ -102,32 +115,28 @@ export function CrearCombo() {
             console.log("Contenido de formData:", formData);
 
             ImagenComboServices.createImage(formData)
-            .then((response) => {
-              setError(response.error);
-              if (response.data != null) {
-                toast.success("Combo registrado con Imagen", {
-                  duration: 4000,
-                  position: "top-center",
-                });
-                return navigate("/combo-table");
-              }
-            })
-            .catch((error) => {
-              if (error instanceof SyntaxError) {
-                console.log(error);
-                setError(error);
-                throw new Error('Respuesta no válida del servidor');
-              }
-
-            });
-
+              .then((response) => {
+                setError(response.error);
+                if (response.data != null) {
+                  toast.success("Combo registrado con Imagen", {
+                    duration: 4000,
+                    position: "top-center",
+                  });
+                  return navigate("/combo-table");
+                }
+              })
+              .catch((error) => {
+                if (error instanceof SyntaxError) {
+                  console.log(error);
+                  setError(error);
+                  throw new Error("Respuesta no válida del servidor");
+                }
+              });
           })
           .catch((error) => {
             setError(error);
             throw new Error("Respuesta no válida del servidor");
           });
-
-       
       }
     } catch (error) {
       console.error(error);
@@ -145,7 +154,6 @@ export function CrearCombo() {
     setLoadedCategorias(true);
   }, []);
 
-
   const [dataProductos, setDataProductos] = useState({});
   const [loadedProductos, setLoadedProductos] = useState(false);
   useEffect(() => {
@@ -161,8 +169,22 @@ export function CrearCombo() {
       });
   }, []);
 
+  const [dataCombos, setDataCombos] = useState({});
+  const [loadedCombos, setLoadedCombos] = useState(false);
+  useEffect(() => {
+    CombosServices.getCombos()
+      .then((response) => {
+        setDataCombos(response.data);
+        setLoadedCombos(true);
+      })
+      .catch((error) => {
+        setError(error);
+        setLoadedCombos(false);
+        throw new Error("Respuesta no válida del servidor");
+      });
+  }, []);
+
   if (error) return <p>Error: {error.message}</p>;
-  
 
   return (
     <form onSubmit={handleSubmit(onSubmit, onError)} noValidate>

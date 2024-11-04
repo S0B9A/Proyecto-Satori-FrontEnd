@@ -14,8 +14,10 @@ import ProductoServices from "../../Services/ProductoServices";
 import MenuServices from "../../Services/MenuServices";
 import { SelectProductos } from "../Combo/Form/SelectProductos";
 import { SelectCombos } from "./Form/SelectCombos";
+import { useNavigate } from "react-router-dom";
 
 export function CrearMenu() {
+  const navigate = useNavigate();
   // Esquema de validación
   const MenuSchema = yup.object({
     nombre: yup
@@ -87,10 +89,25 @@ export function CrearMenu() {
 
     try {
       if (MenuSchema.isValid()) {
+        // Verificar si el producto "hamburguesa" ya existe
+        const menuExiste = dataMenus.some(
+          (menu) => menu.nombre.toLowerCase() === DataForm.nombre.toLowerCase()
+        );
+
+        if (menuExiste) {
+          console.log("El producto ya existe, saliendo de la función.");
+          toast.error("Ya existe un menu con ese nombre", {
+            duration: 4000,
+            position: "top-center",
+          });
+          return; // Salir de la función si el producto ya existe
+        }
+
         MenuServices.createMenu(DataForm)
           .then((response) => {
             setError(response.error);
             if (response.data != null) notify();
+            return navigate("/menu-table");
           })
           .catch((error) => {
             setError(error);
@@ -128,6 +145,21 @@ export function CrearMenu() {
       .catch((error) => {
         setError(error);
         setLoadedCombos(false);
+        throw new Error("Respuesta no válida del servidor");
+      });
+  }, []);
+
+  const [dataMenus, setDataMenus] = useState({});
+  const [loadedMenus, setLoadedMenus] = useState(false);
+  useEffect(() => {
+    MenuServices.getMenus()
+      .then((response) => {
+        setDataMenus(response.data);
+        setLoadedMenus(true);
+      })
+      .catch((error) => {
+        setError(error);
+        setLoadedMenus(false);
         throw new Error("Respuesta no válida del servidor");
       });
   }, []);
@@ -292,7 +324,6 @@ export function CrearMenu() {
               {errors.combos?.message}
             </FormHelperText>
           </FormControl>
-
         </Grid>
 
         <Grid item xs={12}>

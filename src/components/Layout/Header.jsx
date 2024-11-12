@@ -2,72 +2,74 @@ import React, { useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import { AppProvider } from "@toolpad/core/AppProvider";
 import { DashboardLayout } from "@toolpad/core/DashboardLayout";
-import DashboardIcon from '@mui/icons-material/Dashboard';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import { useNavigate } from "react-router-dom"; // Importa useNavigate
+import { useNavigate, Link } from "react-router-dom";
 import demoTheme from "../../themes/theme"; 
 import logo from "../Image/logo2.png";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import InventoryIcon from '@mui/icons-material/Inventory'; // Para Productos
-import BuildIcon from '@mui/icons-material/Build'; // Para Mantenimiento
-import FastfoodIcon from '@mui/icons-material/Fastfood'; // Para Combos
-import MenuBookIcon from '@mui/icons-material/MenuBook'; // Para Menu Actual
-import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu'; // Para Nuestros Menus
-import PlaceIcon from '@mui/icons-material/Place'; // Para Nuestras Estaciones
+import InventoryIcon from '@mui/icons-material/Inventory';
+import BuildIcon from '@mui/icons-material/Build';
+import FastfoodIcon from '@mui/icons-material/Fastfood';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
+import PlaceIcon from '@mui/icons-material/Place';
+import IconButton from '@mui/material/IconButton';
+import Badge from '@mui/material/Badge';
+import { useCart } from "../../hook/UseCart";
 
 // Crear un tema personalizado para aplicar la fuente y colores
 const theme = createTheme({
   typography: {
-    fontFamily: 'Noto Sans JP, sans-serif', // Fuente asiática
+    fontFamily: 'Noto Sans JP, sans-serif',
     h4: {
-      color: '#B22222', // Color rojizo oscuro
-      fontSize: '1.5rem', // Tamaño de letra más pequeño
+      color: '#B22222',
+      fontSize: '1.5rem',
     },
     h6: {
-      fontSize: '1rem', // Tamaño de letra más pequeño para títulos de productos y combos
+      fontSize: '1rem',
     },
   },
 });
-
 
 const NAVIGATION = [
   {
     segment: 'producto',
     title: 'Productos',
-    icon: <InventoryIcon />, // Icono para Productos
+    icon: <InventoryIcon />,
   },
   {
     segment: 'combo',
     title: 'Combos',
-    icon: <FastfoodIcon />, // Icono para Combos
+    icon: <FastfoodIcon />,
   },
   {
     segment: 'menu',
     title: 'Menu Actual',
-    icon: <MenuBookIcon />, // Icono para Menu Actual
+    icon: <MenuBookIcon />,
   },
   {
     segment: 'menus',
     title: 'Nuestros Menus',
-    icon: <RestaurantMenuIcon />, // Icono para Nuestros Menus
+    icon: <RestaurantMenuIcon />,
   },
   {
     segment: 'estaciones',
     title: 'Nuestras Estaciones',
-    icon: <PlaceIcon />, // Icono para Nuestras Estaciones
+    icon: <PlaceIcon />,
   },
   {
     segment: 'mantenimiento',
     title: 'Mantenimiento',
-    icon: <BuildIcon />, // Icono para mantenimiento
+    icon: <BuildIcon />,
   },
-
 ];
 
 function Header(props) {
+  //Mostrar cantidad de elementos de la compra
+  const { cart, getCountItems } = useCart();
   const { window } = props;
   const [pathname, setPathname] = useState("/dashboard");
-  const navigate = useNavigate(); // Obtén la función navigate
+  const navigate = useNavigate();
 
   const router = useMemo(
     () => ({
@@ -75,7 +77,7 @@ function Header(props) {
       searchParams: new URLSearchParams(),
       navigate: (path) => {
         setPathname(String(path));
-        navigate(path); // Navega a la nueva ruta
+        navigate(path);
       },
     }),
     [pathname, navigate]
@@ -85,33 +87,49 @@ function Header(props) {
 
   const handleNavigation = (segment) => {
     setPathname(`/${segment}`);
-    navigate(`/${segment}`); // Navega a la nueva ruta
+    navigate(`/${segment}`);
   };
 
- 
+
   return (
     <ThemeProvider theme={theme}>
-    <AppProvider
-      navigation={NAVIGATION.map((item) => ({
-        ...item,
-        onClick: () => handleNavigation(item.segment), // Manejar clic
-      }))}
-      router={router}
-      branding={{
-        logo: <img src={logo} alt="MUI logo" />,
-        title: "Satori Asian Cuisine",
-      }}
-      theme={demoTheme}
-      window={demoWindow}
-    >
-      <DashboardLayout>
-        {/* Aquí se coloca el contenido dinámico */}
-        {props.children}
-      </DashboardLayout>
-    </AppProvider>
+      <AppProvider
+        navigation={NAVIGATION.map((item) => ({
+          ...item,
+          onClick: () => handleNavigation(item.segment),
+        }))}
+        router={router}
+        branding={{
+          logo: <img src={logo} alt="MUI logo" />,
+          title: "Satori Asian Cuisine",
+        }}
+        theme={demoTheme}
+        window={demoWindow}
+      >
+        <DashboardLayout>
+         {/* Botones con iconos de carrito y notificaciones */}
+         <IconButton 
+            size="large" 
+            sx={{ 
+              color: 'red', 
+              position: 'fixed', 
+              transform: 'scale(1.0)', // Aumenta ligeramente el tamaño
+              marginTop: '14px',
+              marginLeft: '1590px'
+              
+            }}
+          >
+            <Badge badgeContent={getCountItems(cart)} component={Link} to='/rental/crear/'>
+              <ShoppingCartIcon sx={{ color: 'red' }} />
+            </Badge>
+          </IconButton>
+
+          {/* Aquí se coloca el contenido dinámico */}
+          {props.children}
+        </DashboardLayout>
+      </AppProvider>
     </ThemeProvider>
   );
-  
 }
 
 Header.propTypes = {

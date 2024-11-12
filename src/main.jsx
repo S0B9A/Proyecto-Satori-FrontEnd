@@ -16,11 +16,13 @@ import {ListaMenus} from "./components/Menu/ListaMenus.jsx";
 import TablaProductos from './components/Producto/TablaProductos.jsx';
 import TablaCombos from './components/Combo/TablaCombos.jsx';
 import TablaMenus from './components/Menu/TablaMenus.jsx';
+import TablaPedidos from './components/Pedido/TablaPedidos.jsx';
 import {ListaEstaciones} from "./components/Estacion/ListaEstaciones.jsx";
 import { Mantenimiento } from './components/Mantenimiento/mantenimiento.jsx';
 import { ActualizarProducto } from './components/Producto/ActualizarProducto.jsx';
 import { ActualizarCombo } from './components/Combo/ActualizarCombo.jsx';
 import { ActualizarMenu } from './components/Menu/ActualizarMenu.jsx';
+import { ActualizarPedido } from './components/Pedido/ActualizarPedido.jsx';
 import { CrearProducto } from './components/Producto/CrearProducto.jsx';
 import { CrearCombo } from './components/Combo/CrearCombo.jsx';
 import { CrearMenu } from './components/Menu/CrearMenu.jsx';
@@ -86,6 +88,10 @@ const rutas = createBrowserRouter([
         element: <TablaMenus/>,
       },
       {
+        path: '/pedido-table',
+        element: <TablaPedidos/>,
+      },
+      {
         path: '/producto/update/:id',
         element: <ActualizarProducto/>,
       },
@@ -96,6 +102,10 @@ const rutas = createBrowserRouter([
       {
         path: '/menu/update/:id',
         element: <ActualizarMenu/>,
+      },
+      {
+        path: '/pedido/update/:id',
+        element: <ActualizarPedido/>,
       },
       {
         path: '/producto/Crear/',

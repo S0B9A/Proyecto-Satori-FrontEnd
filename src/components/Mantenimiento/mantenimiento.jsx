@@ -36,6 +36,7 @@ export function Mantenimiento() {
     { id: 1, title: "Mantenimiento de Productos", buttonLabel: "Gestionar Productos", link: `/producto-table` },
     { id: 2, title: "Mantenimiento de Combos", buttonLabel: "Gestionar Combos", link: `/combo-table` },
     { id: 3, title: "Mantenimiento del Menú", buttonLabel: "Gestionar Menú", link: `/menu-table` },
+    { id: 4, title: "Mantenimiento de los Pedidos", buttonLabel: "Gestionar Pedido", link: `/pedido-table` },
   ];
 
   return (

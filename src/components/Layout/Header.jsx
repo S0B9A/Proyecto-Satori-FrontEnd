@@ -2,74 +2,92 @@ import React, { useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import { AppProvider } from "@toolpad/core/AppProvider";
 import { DashboardLayout } from "@toolpad/core/DashboardLayout";
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import AccountCircle from "@mui/icons-material/AccountCircle";
 import { useNavigate, Link } from "react-router-dom";
-import demoTheme from "../../themes/theme"; 
+import demoTheme from "../../themes/theme";
 import logo from "../Image/logo2.png";
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import BuildIcon from '@mui/icons-material/Build';
-import FastfoodIcon from '@mui/icons-material/Fastfood';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
-import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
-import PlaceIcon from '@mui/icons-material/Place';
-import IconButton from '@mui/material/IconButton';
-import Badge from '@mui/material/Badge';
-import { useCart } from "../../hook/UseCart";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import InventoryIcon from "@mui/icons-material/Inventory";
+import BuildIcon from "@mui/icons-material/Build";
+import FastfoodIcon from "@mui/icons-material/Fastfood";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
+import PlaceIcon from "@mui/icons-material/Place";
+import IconButton from "@mui/material/IconButton";
+import Badge from "@mui/material/Badge";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
+import { useCart } from "../../hook/useCart";
 
 // Crear un tema personalizado para aplicar la fuente y colores
 const theme = createTheme({
   typography: {
-    fontFamily: 'Noto Sans JP, sans-serif',
+    fontFamily: "Noto Sans JP, sans-serif",
     h4: {
-      color: '#B22222',
-      fontSize: '1.5rem',
+      color: "#B22222",
+      fontSize: "1.5rem",
     },
     h6: {
-      fontSize: '1rem',
+      fontSize: "1rem",
     },
   },
 });
 
 const NAVIGATION = [
   {
-    segment: 'producto',
-    title: 'Productos',
+    segment: "producto",
+    title: "Productos",
     icon: <InventoryIcon />,
+    roles: null,
   },
   {
-    segment: 'combo',
-    title: 'Combos',
+    segment: "combo",
+    title: "Combos",
     icon: <FastfoodIcon />,
+    roles: null,
   },
   {
-    segment: 'menu',
-    title: 'Menu Actual',
+    segment: "menu",
+    title: "Menu Actual",
     icon: <MenuBookIcon />,
+    roles: null,
   },
   {
-    segment: 'menus',
-    title: 'Nuestros Menus',
+    segment: "menus",
+    title: "Nuestros Menus",
     icon: <RestaurantMenuIcon />,
+    roles: null,
   },
   {
-    segment: 'estaciones',
-    title: 'Nuestras Estaciones',
+    segment: "estaciones",
+    title: "Nuestras Estaciones",
     icon: <PlaceIcon />,
+    roles: null,
   },
   {
-    segment: 'mantenimiento',
-    title: 'Mantenimiento',
+    segment: "mantenimiento",
+    title: "Mantenimiento",
     icon: <BuildIcon />,
+    roles: null,
   },
 ];
 
 function Header(props) {
-  //Mostrar cantidad de elementos de la compra
   const { cart, getCountItems } = useCart();
   const { window } = props;
   const [pathname, setPathname] = useState("/dashboard");
   const navigate = useNavigate();
+  const [anchorElUser, setAnchorElUser] = useState(null);
+
+  // Lista enlaces menu usuario
+  const userItems = [
+    { name: "Login", link: "/user/login", login: false },
+    { name: "Registrarse", link: "/user/create", login: false },
+    { name: "Logout", link: "/user/logout", login: true },
+  ];
 
   const router = useMemo(
     () => ({
@@ -90,6 +108,13 @@ function Header(props) {
     navigate(`/${segment}`);
   };
 
+  const handleUserMenuOpen = (event) => {
+    setAnchorElUser(event.currentTarget);
+  };
+
+  const handleUserMenuClose = () => {
+    setAnchorElUser(null);
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -107,22 +132,79 @@ function Header(props) {
         window={demoWindow}
       >
         <DashboardLayout>
-         {/* Botones con iconos de carrito y notificaciones */}
-         <IconButton 
-            size="large" 
-            sx={{ 
-              color: 'red', 
-              position: 'fixed', 
-              transform: 'scale(1.0)', // Aumenta ligeramente el tamaño
-              marginTop: '14px',
-              marginLeft: '1590px'
-              
+          {/* Botones con iconos de carrito y notificaciones */}
+          <IconButton
+            size="large"
+            sx={{
+              color: "red",
+              position: "fixed",
+              transform: "scale(1.0)",
+              marginTop: "14px",
+              marginLeft: "1580px",
+              width:"100px"
             }}
           >
-            <Badge badgeContent={getCountItems(cart)} component={Link} to='/rental/crear/'>
-              <ShoppingCartIcon sx={{ color: 'red' }} />
+            <Badge
+              badgeContent={getCountItems(cart)}
+              component={Link}
+              to="/rental/crear/"
+            >
+              <ShoppingCartIcon sx={{ color: "red" }} />
             </Badge>
           </IconButton>
+
+          {/* Menú de usuario */}
+          <Box sx={{ flexGrow: 0 }}>
+            <IconButton
+              size="large"
+              edge="end"
+              aria-label="account of current user"
+              aria-controls="user-menu"
+              aria-haspopup="true"
+              onClick={handleUserMenuOpen}
+              color="red"
+              sx={{
+                color: "red",
+                position: "fixed",
+                transform: "scale(1.0)",
+                marginTop: "14px",
+                marginLeft: "1630px",
+                width:"80px"
+              }}
+            >
+              <AccountCircle />
+            </IconButton>
+            <Menu
+              sx={{ mt: "45px" }}
+              id="menu-appbar"
+              anchorEl={anchorElUser}
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              open={Boolean(anchorElUser)}
+              onClose={handleUserMenuClose}
+            >
+              <MenuItem>
+                <Typography variant="subtitle1" gutterBottom>
+                  Email usuario
+                </Typography>
+              </MenuItem>
+
+              {userItems.map((setting, index) => (
+                <MenuItem key={index} component={Link} to={setting.link}>
+                  <Typography sx={{ textAlign: "center" }}>
+                    {setting.name}
+                  </Typography>
+                </MenuItem>
+              ))}
+            </Menu>
+          </Box>
 
           {/* Aquí se coloca el contenido dinámico */}
           {props.children}

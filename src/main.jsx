@@ -31,6 +31,7 @@ import { Unauthorized } from "./components/Usuario/Unauthorized.jsx";
 import { Login } from "./components/Usuario/Login.jsx";
 import { Logout } from "./components/Usuario/Logout.jsx";
 import { Signup } from "./components/Usuario/Signup.jsx";
+import { Auth } from "./components/Usuario/Auth.jsx";
 
 
 const rutas = createBrowserRouter([
@@ -40,6 +41,16 @@ const rutas = createBrowserRouter([
       {
         path: "/",
         element: <MenuActual />,
+      },
+      {
+        path:'/',
+        element:<Auth requiredRoles={['Administrador']} />,
+        children:[
+          {
+            path: "/mantenimiento",
+            element: <Mantenimiento />,
+          },
+        ]
       },
       {
         path: "*",
@@ -76,10 +87,6 @@ const rutas = createBrowserRouter([
       {
         path: "/estaciones",
         element: <ListaEstaciones />,
-      },
-      {
-        path: "/mantenimiento",
-        element: <Mantenimiento />,
       },
       {
         path: "/producto-table",

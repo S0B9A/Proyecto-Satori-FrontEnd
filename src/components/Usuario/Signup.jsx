@@ -17,12 +17,12 @@ export function Signup() {
   const navigate = useNavigate();
   // Esquema de validación
   const loginSchema = yup.object({
-    name: yup.string().required('El nombre es requerido'),
+    nombre: yup.string().required('El nombre es requerido'),
     email: yup
       .string()
       .required('El email es requerido')
       .email('Formato email'),
-    password: yup.string().required('El password es requerido'),
+    contraseña: yup.string().required('El password es requerido'),
     rol_id: yup.number().required('El rol es requerido'),
   });
   const {
@@ -33,9 +33,9 @@ export function Signup() {
   } = useForm({
     // Valores iniciales
     defaultValues: {
-      name: '',
+      nombre: '',
       email: '',
-      password: '',
+      contraseña: '',
       rol_id: 2,
     },
     // Asignación de validaciones
@@ -89,15 +89,15 @@ export function Signup() {
           <Grid size={12} sm={12}>
             <FormControl variant="standard" fullWidth sx={{ m: 1 }}>
               <Controller
-                name="name"
+                name="nombre"
                 control={control}
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    id="name"
+                    id="nombre"
                     label="Nombre"
-                    error={Boolean(errors.name)}
-                    helperText={errors.name ? errors.name.message : ' '}
+                    error={Boolean(errors.nombre)}
+                    helperText={errors.nombre ? errors.nombre.message : ' '}
                   />
                 )}
               />
@@ -123,16 +123,16 @@ export function Signup() {
           <Grid size={12} sm={6}>
             <FormControl variant="standard" fullWidth sx={{ m: 1 }}>
               <Controller
-                name="password"
+                name="contraseña"
                 control={control}
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    id="password"
-                    label="Password"
+                    id="contraseña"
+                    label="contraseña"
                     type="password"
-                    error={Boolean(errors.password)}
-                    helperText={errors.password ? errors.password.message : ' '}
+                    error={Boolean(errors.contraseña)}
+                    helperText={errors.contraseña ? errors.contraseña.message : ' '}
                   />
                 )}
               />

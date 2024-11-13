@@ -11,7 +11,7 @@ import * as yup from 'yup';
 import { useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import toast from 'react-hot-toast';
-import UserService from '../../services/UserService';
+import UserService from '../../Services/UserService';
 import { UserContext } from '../../contexts/UserContext';
 
 export function Login() {
@@ -23,7 +23,7 @@ export function Login() {
       .string()
       .required('El email es requerido')
       .email('Formato email'),
-    password: yup.string().required('El password es requerido'),
+      contraseña: yup.string().required('La contraseña es requerido'),
   });
   const {
     control,
@@ -33,7 +33,7 @@ export function Login() {
     // Valores iniciales
     defaultValues: {
       email: '',
-      password: '',
+      contraseña: '',
     },
     // Asignación de validaciones
     resolver: yupResolver(loginSchema),
@@ -58,7 +58,7 @@ export function Login() {
             saveUser(response.data);
             toast.success('Bienvenido, usuario', {
               duration: 4000,
-              position: 'top-right',
+              position: 'top-center',
             });
             return navigate('/');
           } else {
@@ -69,7 +69,7 @@ export function Login() {
             ) {
               toast.error('Usuario NO válido', {
                 duration: 4000,
-                position: 'top-right',
+                position: 'top-center',
               });
             }
           }
@@ -100,7 +100,7 @@ export function Login() {
               Login
             </Typography>
           </Grid>
-          <Grid size={12} sm={4}>
+          <Grid size={7} sm={4}>
             {/* ['filled','outlined','standard']. */}
             <FormControl variant="standard" fullWidth sx={{ m: 1 }}>
               <Controller
@@ -118,19 +118,19 @@ export function Login() {
               />
             </FormControl>
           </Grid>
-          <Grid size={12} sm={4}>
+          <Grid size={7} sm={4}>
             <FormControl variant="standard" fullWidth sx={{ m: 1 }}>
               <Controller
-                name="password"
+                name="contraseña"
                 control={control}
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    id="password"
-                    label="Password"
+                    id="contraseña"
+                    label="contraseña"
                     type="password"
-                    error={Boolean(errors.password)}
-                    helperText={errors.password ? errors.password.message : ' '}
+                    error={Boolean(errors.contraseña)}
+                    helperText={errors.contraseña ? errors.contraseña.message : ' '}
                   />
                 )}
               />

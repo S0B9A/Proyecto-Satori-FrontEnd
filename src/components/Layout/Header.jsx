@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useContext, useEffect } from "react";
 import PropTypes from "prop-types";
 import { AppProvider } from "@toolpad/core/AppProvider";
 import { DashboardLayout } from "@toolpad/core/DashboardLayout";
@@ -21,6 +21,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { useCart } from "../../hook/useCart";
+import { UserContext } from "../../contexts/UserContext";
 
 // Crear un tema personalizado para aplicar la fuente y colores
 const theme = createTheme({
@@ -71,11 +72,20 @@ const NAVIGATION = [
     segment: "mantenimiento",
     title: "Mantenimiento",
     icon: <BuildIcon />,
-    roles: null,
+    roles: ["Administrador"],
   },
 ];
 
 function Header(props) {
+  //Obtener el usuario autenticado con el token y decodificarlo
+  //Informacion del usuario logueado
+  const { user, decodeToken, autorize } = useContext(UserContext);
+
+  const [userData, setUserData] = useState(decodeToken());
+  useEffect(() => {
+    setUserData(decodeToken());
+  }, [user]);
+
   const { cart, getCountItems } = useCart();
   const { window } = props;
   const [pathname, setPathname] = useState("/dashboard");
@@ -119,7 +129,14 @@ function Header(props) {
   return (
     <ThemeProvider theme={theme}>
       <AppProvider
-        navigation={NAVIGATION.map((item) => ({
+        navigation={NAVIGATION.filter((item) => {
+          // Si el item tiene roles, se verifica si el usuario está autorizado
+          if (item.roles) {
+            return autorize({ requiredRoles: item.roles });
+          }
+          // Si no tiene roles (es null), se permite el acceso a todos
+          return item.roles === null;
+        }).map((item) => ({
           ...item,
           onClick: () => handleNavigation(item.segment),
         }))}
@@ -141,7 +158,7 @@ function Header(props) {
               transform: "scale(1.0)",
               marginTop: "14px",
               marginLeft: "1580px",
-              width:"100px"
+              width: "100px",
             }}
           >
             <Badge
@@ -169,7 +186,7 @@ function Header(props) {
                 transform: "scale(1.0)",
                 marginTop: "14px",
                 marginLeft: "1630px",
-                width:"80px"
+                width: "80px",
               }}
             >
               <AccountCircle />
@@ -190,19 +207,40 @@ function Header(props) {
               open={Boolean(anchorElUser)}
               onClose={handleUserMenuClose}
             >
-              <MenuItem>
-                <Typography variant="subtitle1" gutterBottom>
-                  Email usuario
-                </Typography>
-              </MenuItem>
-
-              {userItems.map((setting, index) => (
-                <MenuItem key={index} component={Link} to={setting.link}>
-                  <Typography sx={{ textAlign: "center" }}>
-                    {setting.name}
+              {userData && (
+                <MenuItem>
+                  <Typography variant="subtitle1" gutterBottom>
+                    {userData?.email}
                   </Typography>
                 </MenuItem>
-              ))}
+              )}
+
+              {userItems.map((setting, index) => {
+                if (
+                  setting.login &&
+                  userData &&
+                  Object.keys(userData).length > 0
+                ) {
+                  return (
+                    <MenuItem key={index} component={Link} to={setting.link}>
+                      <Typography sx={{ textAlign: "center" }}>
+                        {setting.name}
+                      </Typography>
+                    </MenuItem>
+                  );
+                } else if (
+                  !setting.login &&
+                  Object.keys(userData).length === 0
+                ) {
+                  return (
+                    <MenuItem key={index} component={Link} to={setting.link}>
+                      <Typography sx={{ textAlign: "center" }}>
+                        {setting.name}
+                      </Typography>
+                    </MenuItem>
+                  );
+                }
+              })}
             </Menu>
           </Box>
 

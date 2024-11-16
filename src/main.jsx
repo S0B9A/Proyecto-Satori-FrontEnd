@@ -32,6 +32,7 @@ import { Login } from "./components/Usuario/Login.jsx";
 import { Logout } from "./components/Usuario/Logout.jsx";
 import { Signup } from "./components/Usuario/Signup.jsx";
 import { Auth } from "./components/Usuario/Auth.jsx";
+import { PedidosUsuario } from "./components/Pedido/PedidosUsuario.jsx";
 
 
 const rutas = createBrowserRouter([
@@ -119,6 +120,10 @@ const rutas = createBrowserRouter([
       {
         path: "/pedido/update/:id",
         element: <ActualizarPedido />,
+      },
+      {
+        path: "/pedido/pedidosUsuario/:id",
+        element: <PedidosUsuario />,
       },
       {
         path: "/producto/Crear/",

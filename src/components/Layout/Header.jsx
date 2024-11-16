@@ -13,6 +13,7 @@ import BuildIcon from "@mui/icons-material/Build";
 import FastfoodIcon from "@mui/icons-material/Fastfood";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
+import ListAltIcon from "@mui/icons-material/ListAlt";
 import PlaceIcon from "@mui/icons-material/Place";
 import IconButton from "@mui/material/IconButton";
 import Badge from "@mui/material/Badge";
@@ -37,44 +38,7 @@ const theme = createTheme({
   },
 });
 
-const NAVIGATION = [
-  {
-    segment: "producto",
-    title: "Productos",
-    icon: <InventoryIcon />,
-    roles: null,
-  },
-  {
-    segment: "combo",
-    title: "Combos",
-    icon: <FastfoodIcon />,
-    roles: null,
-  },
-  {
-    segment: "menu",
-    title: "Menu Actual",
-    icon: <MenuBookIcon />,
-    roles: null,
-  },
-  {
-    segment: "menus",
-    title: "Nuestros Menus",
-    icon: <RestaurantMenuIcon />,
-    roles: null,
-  },
-  {
-    segment: "estaciones",
-    title: "Nuestras Estaciones",
-    icon: <PlaceIcon />,
-    roles: null,
-  },
-  {
-    segment: "mantenimiento",
-    title: "Mantenimiento",
-    icon: <BuildIcon />,
-    roles: ["Administrador"],
-  },
-];
+
 
 function Header(props) {
   //Obtener el usuario autenticado con el token y decodificarlo
@@ -97,6 +61,51 @@ function Header(props) {
     { name: "Login", link: "/user/login", login: false },
     { name: "Registrarse", link: "/user/create", login: false },
     { name: "Logout", link: "/user/logout", login: true },
+  ];
+
+  const NAVIGATION = [
+    {
+      segment: "producto",
+      title: "Productos",
+      icon: <InventoryIcon />,
+      roles: null,
+    },
+    {
+      segment: "combo",
+      title: "Combos",
+      icon: <FastfoodIcon />,
+      roles: null,
+    },
+    {
+      segment: "menu",
+      title: "Menu Actual",
+      icon: <MenuBookIcon />,
+      roles: null,
+    },
+    {
+      segment: "menus",
+      title: "Nuestros Menus",
+      icon: <RestaurantMenuIcon />,
+      roles: null,
+    },
+    {
+      segment: "estaciones",
+      title: "Nuestras Estaciones",
+      icon: <PlaceIcon />,
+      roles: null,
+    },
+    {
+      segment: "mantenimiento",
+      title: "Mantenimiento",
+      icon: <BuildIcon />,
+      roles: ["Administrador"],
+    },
+    {
+      segment: `pedido/pedidosUsuario/${userData.id}`,
+      title: "Historial de pedidos",
+      icon: <ListAltIcon />,
+      roles: ["Cliente"],
+    },
   ];
 
   const router = useMemo(

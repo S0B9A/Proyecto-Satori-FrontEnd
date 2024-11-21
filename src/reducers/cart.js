@@ -11,45 +11,48 @@ export const updateLocalStorage = (state) => {
 };
 
 // Función para calcular el subtotal de cada ítem
-const calculateSubtotal = (item) => item.price * item.days;
+const calculateSubtotal = (item) => item.precio * item.cantidad;
 
 // Función para calcular el total del carrito
 const calculateTotal = (cart) =>
   cart.reduce((acc, item) => acc + item.subtotal, 0);
 
-//Reducer carrito de compras
-//state: estado previo
-//retorna un nuevo estado
+// Función para obtener el impuesto
+const calculateTax = (cart) => cart.length * 4;
+
+// Reducer carrito de compras
+// state: estado previo
+// retorna un nuevo estado
 export const cartReducer = (state, action) => {
-  //type: acción a realizar para cambiar el estado
-  //payload: datos que necesita la acción
+  // type: acción a realizar para cambiar el estado
+  // payload: datos que necesita la acción
   const { type: actionType, payload: actionPayload } = action;
 
   switch (actionType) {
-    //Agregar un item a la compra
+    // Agregar un item a la compra
     case CART_ACTION.ADD_ITEM: {
       const { id } = actionPayload;
 
-      //Verificar sí existe
+      // Verificar sí existe
       const productoInCart = state.findIndex((item) => item.id === id);
 
-      //Actualizar compra de producto existente
+      // Actualizar compra de producto existente
       if (productoInCart >= 0) {
-        //structuredClone: copia a profundidad
+        // structuredClone: copia a profundidad
         const newState = structuredClone(state);
 
-        //Aumentar cantidad del producto
+        // Aumentar cantidad del producto
         newState[productoInCart].cantidad += 1;
 
         // Calcula y actualiza el subtotal
         newState[productoInCart].subtotal = calculateSubtotal(
           newState[productoInCart]
         );
-        updateLocalStorage(state);
+        updateLocalStorage(newState);
         return newState;
       }
 
-      //Nuevo producto en la compra
+      // Nuevo producto en la compra
       const newState = [
         ...state,
         {
@@ -63,26 +66,39 @@ export const cartReducer = (state, action) => {
       return newState;
     }
 
-    //Eliminar item de la compra
+    // Eliminar item de la compra
     case CART_ACTION.REMOVE_ITEM: {
       const { id } = actionPayload;
       const newState = state.filter((item) => item.id !== id);
-      updateLocalStorage(state);
+      updateLocalStorage(newState);
       return newState;
     }
 
-    //Eliminar el carrito completo
+    // Eliminar el carrito completo
     case CART_ACTION.CLEAN_CART: {
       updateLocalStorage([]);
       return [];
     }
+
     default:
       return state;
   }
 };
 
 export const getTotal = (state) => {
-  return calculateTotal(state);
+  const total = calculateTotal(state);
+  const tax = calculateTax(state);
+  return total + tax;
+};
+
+export const getTotalSinImpuestos = (state) => {
+  const total = calculateTotal(state);
+  return total;
+};
+
+// Nueva función para obtener solo el impuesto
+export const getTax = (state) => {
+  return calculateTax(state);
 };
 
 export const getCountItems = (state) => {

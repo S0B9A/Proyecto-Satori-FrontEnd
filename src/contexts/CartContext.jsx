@@ -4,8 +4,10 @@ import {
   cartReducer,
   cartInitialState,
   getTotal,
+  getTax,
   getCountItems,
   CART_ACTION,
+  getTotalSinImpuestos,
 } from "../reducers/cart";
 import PropTypes from "prop-types";
 import toast from "react-hot-toast";
@@ -57,6 +59,8 @@ export function CartProvider({ children }) {
         cleanCart,
         getTotal,
         getCountItems,
+        getTax,
+        getTotalSinImpuestos,
       }}
     >
       {children}

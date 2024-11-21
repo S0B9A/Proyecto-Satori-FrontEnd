@@ -10,6 +10,7 @@ import { Box } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import CombosServices from "../../Services/CombosServices";
+import { useCartCombo } from "../../hook/useCartCombo";
 
 const theme = createTheme({
   palette: {
@@ -21,6 +22,7 @@ const theme = createTheme({
 
 // Componente de detalle del producto
 export function DetalleCombo() {
+  const { addItem } = useCartCombo();
   const routeParams = useParams();
   const BASE_URL = import.meta.env.VITE_BASE_URL + 'uploads';
   const [data, setData] = useState(null);
@@ -55,7 +57,7 @@ export function DetalleCombo() {
               alt={data.nombre}
               sx={{ borderRadius: '10px', height: '300px', objectFit: 'cover' }}
             />
-            <Button sx={{ marginTop: '0.8rem' }} variant="contained" color="primary" fullWidth>
+            <Button sx={{ marginTop: '0.8rem' }} variant="contained" color="primary" fullWidth  onClick={()=>addItem(data)}>
               Agregar a la orden
             </Button>
           </Grid>

@@ -22,6 +22,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { useCart } from "../../hook/useCart";
+import { useCartCombo } from "../../hook/useCartCombo";
 import { UserContext } from "../../contexts/UserContext";
 
 // Crear un tema personalizado para aplicar la fuente y colores
@@ -51,6 +52,10 @@ function Header(props) {
   }, [user]);
 
   const { cart, getCountItems } = useCart();
+  const { cartCombo, getCountItemscombo } = useCartCombo();  // Cambiar cartCombo a cart
+
+
+
   const { window } = props;
   const [pathname, setPathname] = useState("/dashboard");
   const navigate = useNavigate();
@@ -171,9 +176,9 @@ function Header(props) {
             }}
           >
             <Badge
-              badgeContent={getCountItems(cart)}
+              badgeContent={getCountItems(cart) + getCountItemscombo(cartCombo) }
               component={Link}
-              to="/rental/crear/"
+              to="/pedido/Registrar/"
             >
               <ShoppingCartIcon sx={{ color: "red" }} />
             </Badge>
@@ -250,6 +255,7 @@ function Header(props) {
                   );
                 }
               })}
+              
             </Menu>
           </Box>
 

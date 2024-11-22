@@ -43,6 +43,13 @@ export function RegistroPedido2() {
           return inputDate >= today;
         }
       ),
+    indicaciones_ubicacion: yup.string().when("tipo_pedido", {
+      is: (value) => value === "Domicilio",
+      then: yup
+        .string()
+        .required("Las indicaciones son obligatorias para domicilio."),
+    }),
+    MetodoPago: yup.string().required("El Método de Pago es necesario"), // Campo obligatorio
   });
 
   const { cart, getTotal } = useCart();
@@ -60,6 +67,11 @@ export function RegistroPedido2() {
       combos: cartCombo,
       total: 0,
       tipo_pedido: "Tienda",
+      indicaciones_ubicacion: "",
+      MetodoPago: "",
+      ObservacionProducto: "",
+      ObservacionCombos: "",
+      estado: "Pendiente de pago"
     },
     resolver: yupResolver(RegistroPedidoSchema),
   });
@@ -80,9 +92,19 @@ export function RegistroPedido2() {
       });
   }, []);
 
+  const METODOS_PAGO = [
+    { id: 1, nombre: "Tarjeta" },
+    { id: 2, nombre: "Efectivo" },
+  ];
+
   const onSubmit = (data) => {
-    const total = getTotal(cart) + getTotalcombo(cartCombo) + (isDomicilio ? 5 : 0);
-    const formattedData = { ...data, total, tipo_pedido: isDomicilio ? "Domicilio" : "Tienda" };
+    const total =
+      getTotal(cart) + getTotalcombo(cartCombo) + (isDomicilio ? 5 : 0);
+    const formattedData = {
+      ...data,
+      total,
+      tipo_pedido: isDomicilio ? "Domicilio" : "Tienda",
+    };
     console.log("Formulario enviado:", formattedData);
   };
 
@@ -105,7 +127,9 @@ export function RegistroPedido2() {
                   {...field}
                   label="Fecha"
                   error={Boolean(errors.pedido_date)}
-                  helperText={errors.pedido_date ? errors.pedido_date.message : " "}
+                  helperText={
+                    errors.pedido_date ? errors.pedido_date.message : " "
+                  }
                 />
               )}
             />
@@ -121,7 +145,12 @@ export function RegistroPedido2() {
                 render={({ field }) => (
                   <>
                     <InputLabel id="customer">Cliente</InputLabel>
-                    <Select {...field} labelId="customer" label="Cliente" defaultValue="">
+                    <Select
+                      {...field}
+                      labelId="customer"
+                      label="Cliente"
+                      defaultValue=""
+                    >
                       {dataUsers.map((customer) => (
                         <MenuItem key={customer.id} value={customer.id}>
                           {customer.nombre}
@@ -153,12 +182,113 @@ export function RegistroPedido2() {
           </FormControl>
         </Grid>
 
+        {/* Campo de indicaciones de ubicación condicional */}
+        {isDomicilio && (
+          <Grid item xs={12}>
+            <Controller
+              name="indicaciones_ubicacion"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Indicaciones de Ubicación"
+                  placeholder="Escribe aquí las indicaciones..."
+                  multiline
+                  rows={3}
+                  error={Boolean(errors.indicaciones_ubicacion)}
+                  helperText={errors.indicaciones_ubicacion?.message}
+                  fullWidth
+                />
+              )}
+            />
+          </Grid>
+        )}
+
+        <Grid item xs={12} sm={6}>
+          {/* Campo Método de Pago */}
+          <FormControl variant="outlined" fullWidth>
+            <InputLabel id="pago">Pago</InputLabel>
+            <Controller
+              name="MetodoPago"
+              control={control}
+              render={({ field }) => (
+                <Select {...field} labelId="pago" label="Pago">
+                  <MenuItem value="" disabled></MenuItem>
+                  {METODOS_PAGO.map((tipo) => (
+                    <MenuItem key={tipo.id} value={tipo.nombre}>
+                      {tipo.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+              )}
+            />
+            <FormHelperText sx={{ color: "#d32f2f" }}>
+              {errors.MetodoPago?.message}
+            </FormHelperText>
+          </FormControl>
+        </Grid>
+
         <Grid item xs={12}>
           <Cart />
         </Grid>
 
         <Grid item xs={12}>
+          {/* Observaciones */}
+          <FormControl fullWidth sx={{ mt: 1 }}>
+            <Controller
+              name="ObservacionProducto"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Observación Producto"
+                  multiline
+                  rows={2}
+                />
+              )}
+            />
+          </FormControl>
+        </Grid>
+
+        <Grid item xs={12}>
           <CartCombo />
+        </Grid>
+
+        <Grid item xs={12}>
+          <FormControl fullWidth sx={{ mt: 1, mb: 4 }}>
+            <Controller
+              name="ObservacionCombos"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Observación Combos"
+                  multiline
+                  rows={2}
+                />
+              )}
+            />
+          </FormControl>
+        </Grid>
+
+        <Grid item xs={12}>
+          <FormControl fullWidth sx={{ mt: 1, mb: 4 }}>
+            <Controller
+              name="estado"
+              control={control}
+              defaultValue="Pendiente de pago" // Valor predeterminado
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Estado del pedido"
+                  InputProps={{
+                    readOnly: true, // Hace el campo de solo lectura
+                  }}
+                  value="Pendiente de pago" // El texto que se mostrará
+                />
+              )}
+            />
+          </FormControl>
         </Grid>
 
         <Grid item xs={12}>

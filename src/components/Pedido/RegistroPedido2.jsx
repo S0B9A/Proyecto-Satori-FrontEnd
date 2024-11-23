@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useContext, useState } from "react";
 import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
@@ -18,9 +18,27 @@ import { CartCombo } from "./CartCombo";
 import { CartPreciototal } from "./CartPreciototal";
 import { useCart } from "../../hook/useCart";
 import { useCartCombo } from "../../hook/useCartCombo";
+import { UserContext } from "../../contexts/UserContext";
+import { DetalleUsuario } from "./DetalleUsuario";
 
 export function RegistroPedido2() {
   const currentDate = format(new Date(), "dd/MM/yyyy");
+
+  const { user, decodeToken, autorize } = useContext(UserContext);
+  const [userData, setUserData] = useState(decodeToken());
+  useEffect(() => {
+    setUserData(decodeToken());
+  }, [user]);
+
+  useEffect(() => {
+    const decoded = decodeToken();
+    console.log("Decoded token:", decoded);
+    setUserData(decoded);
+  }, [user, decodeToken]);
+
+  // Obtener datos del usuario autenticado
+  const userRole = userData?.rol?.name || "";
+  const userId = userData?.id || "";
 
   const RegistroPedidoSchema = yup.object({
     cliente_id: yup
@@ -61,7 +79,7 @@ export function RegistroPedido2() {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      cliente_id: "",
+      cliente_id: "0",
       pedido_date: currentDate,
       productos: cart,
       combos: cartCombo,
@@ -71,15 +89,41 @@ export function RegistroPedido2() {
       MetodoPago: "",
       ObservacionProducto: "",
       ObservacionCombos: "",
-      estado: "Pendiente de pago"
+      estado: "Pendiente de pago",
     },
     resolver: yupResolver(RegistroPedidoSchema),
   });
 
+  const [dataUsersUsarioIngresado, setDataUsersUsarioIngresado] =
+    useState(null);
   const [dataUsers, setDataUsers] = useState([]);
+  const [error, setError] = useState(null);
+  const [loadedUsersUsarioIngresado, setLoadedUsersUsarioIngresado] =
+    useState(false);
   const [loadedUsers, setLoadedUsers] = useState(false);
+
   const [isDomicilio, setIsDomicilio] = useState(false);
 
+  // Obtiene datos específicos de un usuario
+  useEffect(() => {
+    if (userData?.id) {
+      UserService.getUsuario(userData.id)
+        .then((response) => {
+          console.log(userData.id);
+          console.log(response);
+          setDataUsersUsarioIngresado(response.data);
+          setLoadedUsersUsarioIngresado(true);
+        })
+        .catch((error) => {
+          setError(error);
+          setLoadedUsersUsarioIngresado(true);
+        });
+    } else {
+      console.error("ID no disponible, llamada al servicio no realizada.");
+    }
+  }, [userData.id]);
+
+  // Obtiene la lista general de usuarios
   useEffect(() => {
     UserService.getUserClientes()
       .then((response) => {
@@ -87,7 +131,7 @@ export function RegistroPedido2() {
         setLoadedUsers(true);
       })
       .catch((error) => {
-        console.error(error);
+        setError(error);
         setLoadedUsers(false);
       });
   }, []);
@@ -97,14 +141,29 @@ export function RegistroPedido2() {
     { id: 2, nombre: "Efectivo" },
   ];
 
+  const [selectedClient, setSelectedClient] = useState(null);
+
+  if (!loadedUsersUsarioIngresado) return <p>Cargando...</p>;
+  if (error) return <p>Error: {error.message}</p>;
+
   const onSubmit = (data) => {
     const total =
       getTotal(cart) + getTotalcombo(cartCombo) + (isDomicilio ? 5 : 0);
+
+    console.log("data", data);
+
+
     const formattedData = {
       ...data,
       total,
+      cliente_id: userRole === "Cliente" ? userId : data.cliente_id,
       tipo_pedido: isDomicilio ? "Domicilio" : "Tienda",
     };
+
+    console.log("Usuario Rol:", userRole);
+    console.log("Usuario ID:", userId);
+    console.log("Usuario:", dataUsersUsarioIngresado);
+
     console.log("Formulario enviado:", formattedData);
   };
 
@@ -136,6 +195,9 @@ export function RegistroPedido2() {
           </FormControl>
         </Grid>
 
+
+{/* Solo mostrar si el rol es "administrador" */}
+{userRole === "Administrador" && (
         <Grid item xs={12} sm={6}>
           <FormControl variant="outlined" fullWidth>
             {loadedUsers && (
@@ -149,7 +211,15 @@ export function RegistroPedido2() {
                       {...field}
                       labelId="customer"
                       label="Cliente"
-                      defaultValue=""
+                      value={field.value || ""}
+                      onChange={(e) => {
+                        const clientId = e.target.value;
+                        const client = dataUsers.find(
+                          (customer) => customer.id === clientId
+                        );
+                        setSelectedClient(client); // Guarda la información del cliente seleccionado
+                        field.onChange(e); // Asegura que el cambio se registre en el formulario
+                      }}
                     >
                       {dataUsers.map((customer) => (
                         <MenuItem key={customer.id} value={customer.id}>
@@ -166,6 +236,23 @@ export function RegistroPedido2() {
             </FormHelperText>
           </FormControl>
         </Grid>
+        )}
+
+        
+
+        {userRole === "Administrador" && selectedClient && (
+          <Grid item xs={12} sx={{ p: 3 }} >
+            <Typography variant="h6" color="textSecondary">
+              Información del Cliente:
+            </Typography>
+            <Typography variant="body1">
+              Nombre: {selectedClient.nombre}
+            </Typography>
+            <Typography variant="body1">
+              Correo: {selectedClient.email}
+            </Typography>
+          </Grid>
+        )}
 
         <Grid item xs={12} sm={6}>
           <FormControl variant="outlined" fullWidth>
@@ -226,6 +313,10 @@ export function RegistroPedido2() {
               {errors.MetodoPago?.message}
             </FormHelperText>
           </FormControl>
+        </Grid>
+
+        <Grid item xs={12}>
+          <DetalleUsuario />
         </Grid>
 
         <Grid item xs={12}>

@@ -45,7 +45,6 @@ function Header(props) {
   //Obtener el usuario autenticado con el token y decodificarlo
   //Informacion del usuario logueado
   const { user, decodeToken, autorize } = useContext(UserContext);
-
   const [userData, setUserData] = useState(decodeToken());
   useEffect(() => {
     setUserData(decodeToken());

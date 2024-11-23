@@ -32,6 +32,10 @@ class PedidoService {
       data: JSON.stringify(pedido),
     });
   }
+
+  createPedido(Pedido) {
+    return axios.post(BASE_URL, JSON.stringify(Pedido));
+  }
 }
 
 export default new PedidoService();

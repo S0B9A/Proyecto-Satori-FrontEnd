@@ -20,10 +20,13 @@ import { useCart } from "../../hook/useCart";
 import { useCartCombo } from "../../hook/useCartCombo";
 import { UserContext } from "../../contexts/UserContext";
 import { DetalleUsuario } from "./DetalleUsuario";
+import PedidoServices from "../../Services/PedidoServices";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 
 export function RegistroPedido2() {
   const currentDate = format(new Date(), "dd/MM/yyyy");
-
+  const navigate = useNavigate();
   const { user, decodeToken, autorize } = useContext(UserContext);
   const [userData, setUserData] = useState(decodeToken());
   useEffect(() => {
@@ -70,20 +73,31 @@ export function RegistroPedido2() {
     MetodoPago: yup.string().required("El Método de Pago es necesario"), // Campo obligatorio
   });
 
-  const { cart, getTotal } = useCart();
-  const { cartCombo, getTotalcombo } = useCartCombo();
+  const { cart, getTotal, getTotalSinImpuestos, getTax, cleanCart } = useCart();
+  const {
+    cartCombo,
+    getTotalcombo,
+    getTotalSinImpuestoscombo,
+    getTaxcombo,
+    cleanCartCombo,
+  } = useCartCombo();
 
   const {
     control,
+    setValue,
+    getValues,
     handleSubmit,
     formState: { errors },
   } = useForm({
     defaultValues: {
       cliente_id: "0",
+      encargado_id: "",
       pedido_date: currentDate,
       productos: cart,
       combos: cartCombo,
       total: 0,
+      subtotal: 0,
+      impuesto: 0,
       tipo_pedido: "Tienda",
       indicaciones_ubicacion: "",
       MetodoPago: "",
@@ -143,28 +157,73 @@ export function RegistroPedido2() {
 
   const [selectedClient, setSelectedClient] = useState(null);
 
+  // Agrega una validación para asegurarte de que siempre haya al menos un cliente
+  useEffect(() => {
+    if (dataUsers.length > 0) {
+      setValue("cliente_id", dataUsers[0].id); // Establecer el primer cliente como valor por defecto
+    }
+  }, [dataUsers, setValue]);
+
   if (!loadedUsersUsarioIngresado) return <p>Cargando...</p>;
   if (error) return <p>Error: {error.message}</p>;
 
   const onSubmit = (data) => {
-    const total =
-      getTotal(cart) + getTotalcombo(cartCombo) + (isDomicilio ? 5 : 0);
+    try {
+      if (RegistroPedidoSchema.isValid()) {
+        // Convertir fecha al formato de la BD (yyyy-mm-dd)
+        const [day, month, year] = getValues("pedido_date").split("/");
+        const dateFormatDB = `${year}-${month}-${day}`;
 
-    console.log("data", data);
+        const total =
+          getTotal(cart) + getTotalcombo(cartCombo) + (isDomicilio ? 5 : 0);
+        const subtotal =
+          getTotalSinImpuestos(cart) + getTotalSinImpuestoscombo(cartCombo);
+        const impuesto = getTax(cart) + getTaxcombo(cartCombo);
 
+        //Asignar total
+        const dataForm = {
+          ...data,
+          pedido_date: dateFormatDB,
+          total,
+          subtotal,
+          impuesto,
+          cliente_id: userRole === "Cliente" ? userId : data.cliente_id,
+          encargado_id: userRole === "Administrador" ? userId : "",
+          tipo_pedido: isDomicilio ? "Domicilio" : "Tienda",
+        };
 
-    const formattedData = {
-      ...data,
-      total,
-      cliente_id: userRole === "Cliente" ? userId : data.cliente_id,
-      tipo_pedido: isDomicilio ? "Domicilio" : "Tienda",
-    };
+        console.log("Formulario:", dataForm);
 
-    console.log("Usuario Rol:", userRole);
-    console.log("Usuario ID:", userId);
-    console.log("Usuario:", dataUsersUsarioIngresado);
+        //Crear alquiler
+        PedidoServices.createPedido(dataForm)
+          .then((response) => {
+            setError(response.error);
+            //Respuesta al usuario de creación
+            if (response.data != null) {
+              //{id, shop_id, customer_id, rental_date, total, movies}
+              toast.success(`Pedido registrado #${response.data.id}`, {
+                duration: 4000,
+                position: "top-center",
+              });
 
-    console.log("Formulario enviado:", formattedData);
+              cleanCart();
+              cleanCartCombo();
+              // Redireccion a la tabla
+              return navigate("/menu");
+            }
+          })
+          .catch((error) => {
+            if (error instanceof SyntaxError) {
+              console.log(error);
+              setError(error);
+              throw new Error("Respuesta no válida del servidor");
+            }
+          });
+      }
+    } catch (e) {
+      //Error
+      console.error(e);
+    }
   };
 
   return (
@@ -195,53 +254,50 @@ export function RegistroPedido2() {
           </FormControl>
         </Grid>
 
-
-{/* Solo mostrar si el rol es "administrador" */}
-{userRole === "Administrador" && (
-        <Grid item xs={12} sm={6}>
-          <FormControl variant="outlined" fullWidth>
-            {loadedUsers && (
-              <Controller
-                name="cliente_id"
-                control={control}
-                render={({ field }) => (
-                  <>
-                    <InputLabel id="customer">Cliente</InputLabel>
-                    <Select
-                      {...field}
-                      labelId="customer"
-                      label="Cliente"
-                      value={field.value || ""}
-                      onChange={(e) => {
-                        const clientId = e.target.value;
-                        const client = dataUsers.find(
-                          (customer) => customer.id === clientId
-                        );
-                        setSelectedClient(client); // Guarda la información del cliente seleccionado
-                        field.onChange(e); // Asegura que el cambio se registre en el formulario
-                      }}
-                    >
-                      {dataUsers.map((customer) => (
-                        <MenuItem key={customer.id} value={customer.id}>
-                          {customer.nombre}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </>
-                )}
-              />
-            )}
-            <FormHelperText sx={{ color: "error.main" }}>
-              {errors.cliente_id ? errors.cliente_id.message : " "}
-            </FormHelperText>
-          </FormControl>
-        </Grid>
+        {/* Solo mostrar si el rol es "administrador" */}
+        {userRole === "Administrador" && (
+          <Grid item xs={12} sm={6}>
+            <FormControl variant="outlined" fullWidth>
+              {loadedUsers && (
+                <Controller
+                  name="cliente_id"
+                  control={control}
+                  render={({ field }) => (
+                    <>
+                      <InputLabel id="customer">Cliente</InputLabel>
+                      <Select
+                        {...field}
+                        labelId="customer"
+                        label="Cliente"
+                        value={field.value || dataUsers[0]?.id} // Asegúrate de que el primer cliente sea seleccionado por defecto
+                        onChange={(e) => {
+                          const clientId = e.target.value;
+                          const client = dataUsers.find(
+                            (customer) => customer.id === clientId
+                          );
+                          setSelectedClient(client); // Guarda la información del cliente seleccionado
+                          field.onChange(e); // Asegura que el cambio se registre en el formulario
+                        }}
+                      >
+                        {dataUsers.map((customer) => (
+                          <MenuItem key={customer.id} value={customer.id}>
+                            {customer.nombre}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </>
+                  )}
+                />
+              )}
+              <FormHelperText sx={{ color: "error.main" }}>
+                {errors.cliente_id ? errors.cliente_id.message : " "}
+              </FormHelperText>
+            </FormControl>
+          </Grid>
         )}
 
-        
-
         {userRole === "Administrador" && selectedClient && (
-          <Grid item xs={12} sx={{ p: 3 }} >
+          <Grid item xs={12} sx={{ p: 3 }}>
             <Typography variant="h6" color="textSecondary">
               Información del Cliente:
             </Typography>

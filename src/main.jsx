@@ -35,6 +35,7 @@ import { Auth } from "./components/Usuario/Auth.jsx";
 import { PedidosUsuario } from "./components/Pedido/PedidosUsuario.jsx";
 import { RegistroPedido } from "./components/Pedido/RegistroPedido.jsx";
 import { RegistroPedido2 } from "./components/Pedido/RegistroPedido2.jsx";
+import DetallePedido from "./components/Pedido/DetallePedido.jsx";
 
 
 const rutas = createBrowserRouter([
@@ -106,6 +107,10 @@ const rutas = createBrowserRouter([
       {
         path: "/pedido-table",
         element: <TablaPedidos />,
+      },
+      {
+        path: "/pedido/:id",
+        element: <DetallePedido />,
       },
       {
         path: "/producto/update/:id",

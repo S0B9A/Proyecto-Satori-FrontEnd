@@ -167,10 +167,9 @@ function Header(props) {
             size="large"
             sx={{
               color: "red",
-              position: "fixed",
               transform: "scale(1.0)",
               marginTop: "14px",
-              marginLeft: "1580px",
+              marginLeft: "1px",
               width: "100px",
             }}
           >
@@ -195,10 +194,9 @@ function Header(props) {
               color="red"
               sx={{
                 color: "red",
-                position: "fixed",
                 transform: "scale(1.0)",
-                marginTop: "14px",
-                marginLeft: "1630px",
+                marginTop: "5px",
+                marginLeft: "10px",
                 width: "80px",
               }}
             >

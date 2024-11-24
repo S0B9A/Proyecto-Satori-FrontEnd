@@ -36,6 +36,7 @@ import { PedidosUsuario } from "./components/Pedido/PedidosUsuario.jsx";
 import { RegistroPedido } from "./components/Pedido/RegistroPedido.jsx";
 import { RegistroPedido2 } from "./components/Pedido/RegistroPedido2.jsx";
 import DetallePedido from "./components/Pedido/DetallePedido.jsx";
+import { PagoPedido } from "./components/Pedido/PagoPedido.jsx";
 
 
 const rutas = createBrowserRouter([
@@ -131,6 +132,10 @@ const rutas = createBrowserRouter([
       {
         path: "/pedido/pedidosUsuario/:id",
         element: <PedidosUsuario />,
+      },
+      {
+        path: "/pedido/PagoPedido/:id",
+        element: <PagoPedido />,
       },
       {
         path: "/producto/Crear/",

@@ -70,7 +70,6 @@ export function RegistroPedido2() {
         .string()
         .required("Las indicaciones son obligatorias para domicilio."),
     }),
-    MetodoPago: yup.string().required("El Método de Pago es necesario"), // Campo obligatorio
   });
 
   const { cart, getTotal, getTotalSinImpuestos, getTax, cleanCart } = useCart();
@@ -100,7 +99,6 @@ export function RegistroPedido2() {
       impuesto: 0,
       tipo_pedido: "Tienda",
       indicaciones_ubicacion: "",
-      MetodoPago: "",
       ObservacionProducto: "",
       ObservacionCombos: "",
       estado: "Pendiente de pago",
@@ -194,6 +192,14 @@ export function RegistroPedido2() {
 
         console.log("Formulario:", dataForm);
 
+           if (isDomicilio && dataForm.indicaciones_ubicacion === "") {
+          toast.error(`Necesitas agregar la direccion de entrega`, {
+            duration: 4000,
+            position: "top-center",
+          });
+          return;
+        }
+
         //Crear alquiler
         PedidoServices.createPedido(dataForm)
           .then((response) => {
@@ -209,7 +215,7 @@ export function RegistroPedido2() {
               cleanCart();
               cleanCartCombo();
               // Redireccion a la tabla
-              return navigate("/menu");
+              return navigate(`/pedido/PagoPedido/${response.data.id}`);
             }
           })
           .catch((error) => {
@@ -346,30 +352,6 @@ export function RegistroPedido2() {
             />
           </Grid>
         )}
-
-        <Grid item xs={12} sm={6}>
-          {/* Campo Método de Pago */}
-          <FormControl variant="outlined" fullWidth>
-            <InputLabel id="pago">Pago</InputLabel>
-            <Controller
-              name="MetodoPago"
-              control={control}
-              render={({ field }) => (
-                <Select {...field} labelId="pago" label="Pago">
-                  <MenuItem value="" disabled></MenuItem>
-                  {METODOS_PAGO.map((tipo) => (
-                    <MenuItem key={tipo.id} value={tipo.nombre}>
-                      {tipo.nombre}
-                    </MenuItem>
-                  ))}
-                </Select>
-              )}
-            />
-            <FormHelperText sx={{ color: "#d32f2f" }}>
-              {errors.MetodoPago?.message}
-            </FormHelperText>
-          </FormControl>
-        </Grid>
 
         <Grid item xs={12}>
           <DetalleUsuario />

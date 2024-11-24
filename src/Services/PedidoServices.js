@@ -24,6 +24,20 @@ class PedidoService {
     return axios.get(BASE_URL + "/" + PedidoId);
   }
 
+  // http://localhost:81/SatoriAsianCuisine/pedido/getPedidoMasReciente
+  getPedidoMasReciente() {
+    return axios.get(BASE_URL + "/getPedidoMasReciente"); 
+  }
+
+
+
+    // http://localhost:81/SatoriAsianCuisine/pedido/updatePedidoPorPago
+ 
+    updatePedidoPorPago(Pedido) {
+      return axios.post(BASE_URL + "/updatePedidoPorPago", JSON.stringify(Pedido));
+    }
+    
+
   // http://localhost:81/SatoriAsianCuisine/pedido
   updatePedido(pedido) {
     return axios({

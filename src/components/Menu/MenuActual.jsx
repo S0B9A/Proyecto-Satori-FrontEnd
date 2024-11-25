@@ -154,7 +154,7 @@ const BASE_URL = import.meta.env.VITE_BASE_URL + 'uploads';
                       </Typography>
                       <IconButton
                         component={Link}
-                        to={`/producto/${producto.id}`}
+                        to={`/productoMenu/${producto.id}`}
                         aria-label="ver detalles"
                         sx={{
                           color: "#f44336",
@@ -260,7 +260,7 @@ const BASE_URL = import.meta.env.VITE_BASE_URL + 'uploads';
                       </Typography>
                       <IconButton
                         component={Link}
-                        to={`/combo/${combo.id}`}
+                        to={`/comboMenu/${combo.id}`}
                         aria-label="ver detalles"
                         sx={{
                           color: "#f44336",

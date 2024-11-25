@@ -21,7 +21,7 @@ const theme = createTheme({
 });
 
 // Componente de detalle del producto
-export function DetalleProducto() {
+export function DetalleProductoMenu() {
   //usar CartContext
   const { addItem } = useCart();
   const routeParams = useParams();
@@ -68,6 +68,15 @@ export function DetalleProducto() {
               alt={data.nombre}
               sx={{ borderRadius: "10px", height: "300px", objectFit: "cover" }}
             />
+            <Button
+              sx={{ marginTop: "0.8rem" }}
+              variant="contained"
+              color="primary"
+              fullWidth
+              onClick={()=>addItem(data)}
+            >
+              Agregar a la orden
+            </Button>
           </Grid>
           <Grid item xs={12} md={6}>
             <CardContent>
@@ -175,4 +184,4 @@ export function DetalleProducto() {
   );
 }
 
-export default DetalleProducto;
+export default DetalleProductoMenu;

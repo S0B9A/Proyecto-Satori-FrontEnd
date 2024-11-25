@@ -21,7 +21,7 @@ const theme = createTheme({
 });
 
 // Componente de detalle del producto
-export function DetalleCombo() {
+export function DetalleComboMenu() {
   const { addItem } = useCartCombo();
   const routeParams = useParams();
   const BASE_URL = import.meta.env.VITE_BASE_URL + 'uploads';
@@ -57,6 +57,9 @@ export function DetalleCombo() {
               alt={data.nombre}
               sx={{ borderRadius: '10px', height: '300px', objectFit: 'cover' }}
             />
+            <Button sx={{ marginTop: '0.8rem' }} variant="contained" color="primary" fullWidth  onClick={()=>addItem(data)}>
+              Agregar a la orden
+            </Button>
           </Grid>
           <Grid item xs={12} md={6}>
             <CardContent>
@@ -106,4 +109,4 @@ export function DetalleCombo() {
   );
 }
 
-export default DetalleCombo;
+export default DetalleComboMenu;

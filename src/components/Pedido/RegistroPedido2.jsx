@@ -148,11 +148,6 @@ export function RegistroPedido2() {
       });
   }, []);
 
-  const METODOS_PAGO = [
-    { id: 1, nombre: "Tarjeta" },
-    { id: 2, nombre: "Efectivo" },
-  ];
-
   const [selectedClient, setSelectedClient] = useState(null);
 
   // Agrega una validación para asegurarte de que siempre haya al menos un cliente

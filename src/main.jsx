@@ -33,11 +33,12 @@ import { Logout } from "./components/Usuario/Logout.jsx";
 import { Signup } from "./components/Usuario/Signup.jsx";
 import { Auth } from "./components/Usuario/Auth.jsx";
 import { PedidosUsuario } from "./components/Pedido/PedidosUsuario.jsx";
-import { RegistroPedido } from "./components/Pedido/RegistroPedido.jsx";
 import { RegistroPedido2 } from "./components/Pedido/RegistroPedido2.jsx";
 import DetallePedido from "./components/Pedido/DetallePedido.jsx";
 import { PagoPedido } from "./components/Pedido/PagoPedido.jsx";
-
+import { HistorialPedidos } from "./components/Pedido/HistorialPedidos.jsx";
+import DetalleComboMenu from "./components/Combo/DetalleComboMenu.jsx";
+import DetalleProductoMenu from "./components/Producto/DetalleProductoMenu.jsx";
 
 const rutas = createBrowserRouter([
   {
@@ -45,17 +46,39 @@ const rutas = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <MenuActual />,
+        element: <ListaMenus />,
       },
       {
-        path:'/',
-        element:<Auth requiredRoles={['Administrador']} />,
-        children:[
+        path: "/",
+        element: <Auth requiredRoles={["Administrador"]} />,
+        children: [
           {
             path: "/mantenimiento",
             element: <Mantenimiento />,
           },
-        ]
+          {
+            path: "/pedido/historialPedidos",
+            element: <HistorialPedidos />,
+          },
+        ],
+      },
+      {
+        path: "/",
+        element: <Auth requiredRoles={["Administrador", "Cliente"]} />,
+        children: [
+          {
+            path: "/menu",
+            element: <MenuActual />,
+          },
+          {
+            path: "/productoMenu/:id",
+            element: <DetalleProductoMenu />,
+          },
+          {
+            path: "/comboMenu/:id",
+            element: <DetalleComboMenu />,
+          },
+        ],
       },
       {
         path: "*",
@@ -76,10 +99,6 @@ const rutas = createBrowserRouter([
       {
         path: "/combo/:id",
         element: <DetalleCombo />,
-      },
-      {
-        path: "/menu",
-        element: <MenuActual />,
       },
       {
         path: "/menu/:id",
@@ -154,20 +173,20 @@ const rutas = createBrowserRouter([
         element: <RegistroPedido2 />,
       },
       {
-        path: '/unauthorized',
-        element: <Unauthorized />
+        path: "/unauthorized",
+        element: <Unauthorized />,
       },
       {
-        path: '/user/login',
-        element:<Login />
+        path: "/user/login",
+        element: <Login />,
       },
       {
-        path: '/user/logout',
-        element:<Logout />
+        path: "/user/logout",
+        element: <Logout />,
       },
       {
-        path: '/user/create',
-        element:<Signup />
+        path: "/user/create",
+        element: <Signup />,
       },
     ],
   },

@@ -84,7 +84,7 @@ function Header(props) {
       segment: "menu",
       title: "Menu Actual",
       icon: <MenuBookIcon />,
-      roles: null,
+      roles: ["Administrador" , "Cliente"],
     },
     {
       segment: "menus",
@@ -109,6 +109,12 @@ function Header(props) {
       title: "Historial de pedidos",
       icon: <ListAltIcon />,
       roles: ["Cliente"],
+    },
+    {
+      segment: `pedido/historialPedidos`,
+      title: "Historial de pedidos",
+      icon: <ListAltIcon />,
+      roles: ["Administrador"],
     },
   ];
 

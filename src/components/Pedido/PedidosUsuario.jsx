@@ -7,6 +7,7 @@ import CardContent from "@mui/material/CardContent";
 import Button from "@mui/material/Button";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import Pusher from "pusher-js"; // Importa Pusher
 import PedidosServices from "../../Services/PedidoServices";
 
 const theme = createTheme({
@@ -39,6 +40,7 @@ export function PedidosUsuario() {
   const id = routeParams.id || null;
 
   useEffect(() => {
+    // Obtener pedidos iniciales
     PedidosServices.getPedidosPorUsuario(id)
       .then((response) => {
         setData(response.data);
@@ -49,6 +51,36 @@ export function PedidosUsuario() {
         setError(error.message);
         setLoaded(false);
       });
+
+    // Configurar Pusher
+    const pusher = new Pusher("6044eb48c974063b6561", {
+      cluster: "us2",
+    });
+
+    const channel = pusher.subscribe("pedido-channel");
+
+    // Escuchar eventos de Pusher
+    channel.bind("estado-actualizado", (updatedPedido) => {
+      setData((prevData) =>
+        prevData.map((pedido) =>
+          pedido.id === updatedPedido.pedido.id
+            ? { ...pedido, estado: updatedPedido.pedido.estado }
+            : pedido
+        )
+      );
+    });
+
+    // Escuchar el evento 'nuevo-pedido'
+    channel.bind("nuevo-pedido", (newPedido) => {
+      // Agregar el nuevo pedido al inicio de la lista de pedidos
+      setData((prevData) => [newPedido.pedido, ...prevData]);
+    });
+
+    // Cleanup al desmontar el componente
+    return () => {
+      channel.unbind_all();
+      channel.unsubscribe();
+    };
   }, [id]);
 
   if (!loaded) return <p>Cargando...</p>;
@@ -159,8 +191,8 @@ export function PedidosUsuario() {
                         pedido.estado === "Entregado"
                           ? "green"
                           : pedido.estado === "Pendiente"
-                            ? "orange"
-                            : "red",
+                          ? "orange"
+                          : "red",
                     }}
                   >
                     Estado: {pedido.estado}

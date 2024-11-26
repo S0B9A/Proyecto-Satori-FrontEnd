@@ -39,6 +39,7 @@ import { PagoPedido } from "./components/Pedido/PagoPedido.jsx";
 import { HistorialPedidos } from "./components/Pedido/HistorialPedidos.jsx";
 import DetalleComboMenu from "./components/Combo/DetalleComboMenu.jsx";
 import DetalleProductoMenu from "./components/Producto/DetalleProductoMenu.jsx";
+import { Dashboard } from "./components/Dashboard/Dashboard.jsx";
 
 const rutas = createBrowserRouter([
   {
@@ -171,6 +172,10 @@ const rutas = createBrowserRouter([
       {
         path: "/pedido/Registrar/",
         element: <RegistroPedido2 />,
+      },
+      {
+        path: "/pedido/Dashboard/",
+        element: <Dashboard />,
       },
       {
         path: "/unauthorized",

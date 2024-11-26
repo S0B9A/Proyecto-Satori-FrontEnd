@@ -55,5 +55,7 @@ button{
   .MuiTypography-root {
     font-size: 0.9rem !important; /* Ajusta el tamaño del texto en pantallas más pequeñas */
   }
+
+  
 }
 

@@ -14,6 +14,7 @@ import FastfoodIcon from "@mui/icons-material/Fastfood";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
 import ListAltIcon from "@mui/icons-material/ListAlt";
+import DashboardIcon from "@mui/icons-material/Dashboard";
 import PlaceIcon from "@mui/icons-material/Place";
 import IconButton from "@mui/material/IconButton";
 import Badge from "@mui/material/Badge";
@@ -114,6 +115,12 @@ function Header(props) {
       segment: `pedido/historialPedidos`,
       title: "Historial de pedidos",
       icon: <ListAltIcon />,
+      roles: ["Administrador"],
+    },
+    {
+      segment: `pedido/Dashboard/`,
+      title: "Dashboard de pedidos",
+      icon: <DashboardIcon />,
       roles: ["Administrador"],
     },
   ];

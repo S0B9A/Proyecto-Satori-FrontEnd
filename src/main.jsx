@@ -40,6 +40,9 @@ import { HistorialPedidos } from "./components/Pedido/HistorialPedidos.jsx";
 import DetalleComboMenu from "./components/Combo/DetalleComboMenu.jsx";
 import DetalleProductoMenu from "./components/Producto/DetalleProductoMenu.jsx";
 import { Dashboard } from "./components/Dashboard/Dashboard.jsx";
+import { ListaPedidoCocina } from "./components/Cocina/ListaPedidoCocina.jsx";
+import DetallePedidoCocina from "./components/Cocina/DetallePedidoCocina.jsx";
+import { ActualizarPedidoCocina } from "./components/Cocina/ActualizarPedidoCocina.jsx";
 
 const rutas = createBrowserRouter([
   {
@@ -176,6 +179,18 @@ const rutas = createBrowserRouter([
       {
         path: "/pedido/Dashboard/",
         element: <Dashboard />,
+      },
+      {
+        path: "/cocina",
+        element: <ListaPedidoCocina />,
+      },
+      {
+        path: "/cocina/:id",
+        element: <DetallePedidoCocina />,
+      },
+      {
+        path: "/cocina/producto/:id",
+        element: <ActualizarPedidoCocina />,
       },
       {
         path: "/unauthorized",

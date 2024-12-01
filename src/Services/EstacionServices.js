@@ -11,6 +11,12 @@ class EstacionService {
   getEstacionById(EstacionId) {
     return axios.get(BASE_URL + "/" + EstacionId);
   }
+
+     // http://localhost:81/SatoriAsianCuisine/cocina/getEstacionesPorProductoID/id_pedido
+     getEstacionesPorProductoID(ProductoId) {
+      return axios.get(BASE_URL + "/getEstacionesPorProductoID/" + ProductoId);
+    }
+  
 }
 
 export default new EstacionService();

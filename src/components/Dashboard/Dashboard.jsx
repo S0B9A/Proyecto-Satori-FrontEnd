@@ -68,14 +68,12 @@ export function Dashboard() {
         setTopProducts(sortedProducts);
 
         // Procesar los datos para los pedidos por estado
-        const today = new Date().toISOString().split("T")[0];
-        const statusCounts = pedidos
-          .filter((pedido) => pedido.fecha.startsWith(today))
-          .reduce((acc, pedido) => {
-            acc[pedido.estado] = (acc[pedido.estado] || 0) + 1;
-            return acc;
-          }, {});
+        const statusCounts = pedidos.reduce((acc, pedido) => {
+          acc[pedido.estado] = (acc[pedido.estado] || 0) + 1;
+          return acc;
+        }, {});
 
+        // Convertir el objeto de conteo a un arreglo para el gráfico
         setStatusCounts(
           Object.entries(statusCounts).map(([estado, cantidad]) => ({
             estado,
@@ -92,6 +90,7 @@ export function Dashboard() {
       });
   }, []);
 
+  // Función para obtener un color aleatorio
   const getRandomColor = () => {
     const r = Math.floor(Math.random() * 156) + 100;
     const g = Math.floor(Math.random() * 156) + 100;

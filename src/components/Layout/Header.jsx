@@ -12,6 +12,7 @@ import InventoryIcon from "@mui/icons-material/Inventory";
 import BuildIcon from "@mui/icons-material/Build";
 import FastfoodIcon from "@mui/icons-material/Fastfood";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
+import KitchenIcon from "@mui/icons-material/Kitchen";
 import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -121,6 +122,12 @@ function Header(props) {
       segment: `pedido/Dashboard/`,
       title: "Dashboard de pedidos",
       icon: <DashboardIcon />,
+      roles: ["Administrador"],
+    },
+    {
+      segment: `cocina`,
+      title: "Cocina",
+      icon: <KitchenIcon />,
       roles: ["Administrador"],
     },
   ];

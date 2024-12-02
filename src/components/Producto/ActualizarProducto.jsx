@@ -15,6 +15,8 @@ import ProductoService from "../../Services/ProductoServices";
 import ImagenProductoService from "../../Services/ImagenProductoServices";
 import { SelectEstacion } from "./Form/SelectEstacion";
 import EstacionServices from "../../Services/EstacionServices";
+import IngredienteServices from "../../Services/IngredienteServices";
+import { SelectIngrediente } from "./Form/SelectIngrediente";
 
 export function ActualizarProducto() {
   //Url para acceder a la imagenes guardadas en el API
@@ -48,6 +50,12 @@ export function ActualizarProducto() {
             : [];
           response.data.estaciones = estaciones;
 
+            // Verificar si "ingredientes" es un array antes de mapearlo
+            const ingredientes = Array.isArray(response.data.ingredientes)
+            ? response.data.ingredientes.map((item) => item.id)
+            : [];
+          response.data.ingredientes = ingredientes;
+
           setValores(response.data);
         })
         .catch((error) => {
@@ -76,6 +84,7 @@ export function ActualizarProducto() {
     tipo: yup.string().required("El tipo de comida es requerido"),
     categoria: yup.string().required("La categoría del comida es requerida"),
     estaciones: yup.array().min(1, "La estación es requerida"),
+    ingredientes: yup.array().min(1, "Un ingrediente es requerida"),
   });
   const {
     control,
@@ -91,6 +100,7 @@ export function ActualizarProducto() {
       categoria: "",
       image: "",
       estaciones: [],
+      ingredientes: [],
     },
     //Valores a precargar en el formulario
     values,
@@ -216,6 +226,26 @@ export function ActualizarProducto() {
         throw new Error("Respuesta no válida del servidor");
       });
   }, []);
+
+   //Lista de tipos de estaciones
+   const [dataIngredientes, setDataIngredientes] = useState({});
+   const [loadedIngredientes, setLoadedIngredientes] = useState(false);
+   useEffect(() => {
+     IngredienteServices.getIngredientes()
+       .then((response) => {
+         console.log(response);
+         setDataIngredientes(response.data);
+         setLoadedIngredientes(true);
+       })
+       .catch((error) => {
+         console.log(error);
+         setError(error);
+         setLoadedIngredientes(false);
+         throw new Error("Respuesta no válida del servidor");
+       });
+   }, []);
+
+ 
 
   const [file, setFile] = useState(null);
   const [fileURL, setFileURL] = useState(null);
@@ -364,6 +394,22 @@ export function ActualizarProducto() {
               <FormHelperText sx={{ color: "#d32f2f" }}>
                 {" "}
                 {errors.estaciones?.message}
+              </FormHelperText>
+            </FormControl>
+
+            <FormControl fullWidth sx={{ mt: 2 }}>
+              {loadedIngredientes && (
+                <Controller
+                  name="ingredientes"
+                  control={control}
+                  render={({ field }) => (
+                    <SelectIngrediente field={field} data={dataIngredientes} />
+                  )}
+                />
+              )}
+              <FormHelperText sx={{ color: "#d32f2f" }}>
+                {" "}
+                {errors.ingredientes?.message}
               </FormHelperText>
             </FormControl>
 

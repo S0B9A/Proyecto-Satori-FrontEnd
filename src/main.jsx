@@ -43,6 +43,8 @@ import { Dashboard } from "./components/Dashboard/Dashboard.jsx";
 import { ListaPedidoCocina } from "./components/Cocina/ListaPedidoCocina.jsx";
 import DetallePedidoCocina from "./components/Cocina/DetallePedidoCocina.jsx";
 import { ActualizarPedidoCocina } from "./components/Cocina/ActualizarPedidoCocina.jsx";
+import TablaUsuarios from "./components/Usuario/TablaUsuarios.jsx";
+import { CrearUsuario } from "./components/Usuario/CrearUsuario.jsx";
 
 const rutas = createBrowserRouter([
   {
@@ -64,6 +66,32 @@ const rutas = createBrowserRouter([
             path: "/pedido/historialPedidos",
             element: <HistorialPedidos />,
           },
+          {
+            path: "/usuario/Crear",
+            element: <CrearUsuario />,
+          },
+        ],
+      },
+      {
+        path: "/",
+        element: <Auth requiredRoles={["Cocina"]} />,
+        children: [
+          {
+            path: "/pedido/historialPedidos",
+            element: <HistorialPedidos />,
+          },
+          {
+            path: "/cocina",
+            element: <ListaPedidoCocina />,
+          },
+          {
+            path: "/cocina/:id",
+            element: <DetallePedidoCocina />,
+          },
+          {
+            path: "/cocina/producto/:id",
+            element: <ActualizarPedidoCocina />,
+          },
         ],
       },
       {
@@ -81,6 +109,10 @@ const rutas = createBrowserRouter([
           {
             path: "/comboMenu/:id",
             element: <DetalleComboMenu />,
+          },
+          {
+            path: "/usuario-table",
+            element: <TablaUsuarios />,
           },
         ],
       },
@@ -179,18 +211,6 @@ const rutas = createBrowserRouter([
       {
         path: "/pedido/Dashboard/",
         element: <Dashboard />,
-      },
-      {
-        path: "/cocina",
-        element: <ListaPedidoCocina />,
-      },
-      {
-        path: "/cocina/:id",
-        element: <DetallePedidoCocina />,
-      },
-      {
-        path: "/cocina/producto/:id",
-        element: <ActualizarPedidoCocina />,
       },
       {
         path: "/unauthorized",

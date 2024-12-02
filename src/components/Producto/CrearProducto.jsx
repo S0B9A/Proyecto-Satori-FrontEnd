@@ -14,6 +14,8 @@ import ImagenProductoService from "../../Services/ImagenProductoServices";
 import { toast } from "react-hot-toast";
 import { SelectEstacion } from "./Form/SelectEstacion";
 import EstacionServices from "../../Services/EstacionServices";
+import IngredienteServices from "../../Services/IngredienteServices";
+import { SelectIngrediente } from "./Form/SelectIngrediente";
 
 export function CrearProducto() {
   const navigate = useNavigate();
@@ -36,6 +38,7 @@ export function CrearProducto() {
     tipo: yup.string().required("El tipo de comida es requerido"),
     categoria: yup.string().required("La categoría del comida es requerida"),
     estaciones: yup.array().min(1, "La estación es requerida"),
+    ingredientes: yup.array().min(1, "Un ingrediente es requerida"),
     image: yup
       .mixed()
       .test(
@@ -65,6 +68,7 @@ export function CrearProducto() {
       categoria: "",
       image: "",
       estaciones: [],
+      ingredientes: [],
     },
     resolver: yupResolver(ProductoSchema),
   });
@@ -186,6 +190,22 @@ export function CrearProducto() {
         throw new Error("Respuesta no válida del servidor");
       });
   }, []);
+
+  const [dataIngrediente, setDataIngrediente] = useState({});
+  const [loadedIngrediente, setLoadedIngrediente] = useState(false);
+  useEffect(() => {
+    IngredienteServices.getIngredientes()
+      .then((response) => {
+        setDataIngrediente(response.data);
+        setLoadedIngrediente(true);
+      })
+      .catch((error) => {
+        setError(error);
+        setLoadedIngrediente(false);
+        throw new Error("Respuesta no válida del servidor");
+      });
+  }, []);
+
 
   const [dataProductos, setDataProductos] = useState({});
   const [loadedProductos, setLoadedProductos] = useState(false);
@@ -353,6 +373,23 @@ export function CrearProducto() {
               {errors.estaciones?.message}
             </FormHelperText>
           </FormControl>
+
+          <FormControl fullWidth sx={{ mt: 2 }}>
+            {loadedIngrediente && (
+              <Controller
+                name="ingredientes"
+                control={control}
+                render={({ field }) => (
+                  <SelectIngrediente field={field} data={dataIngrediente} />
+                )}
+              />
+            )}
+            <FormHelperText sx={{ color: "#d32f2f" }}>
+              {" "}
+              {errors.ingredientes?.message}
+            </FormHelperText>
+          </FormControl>
+
         </Grid>
 
         {/* Sección Derecha - Imagen */}

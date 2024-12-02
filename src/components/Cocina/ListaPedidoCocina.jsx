@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"; 
+import React, { useState, useEffect } from "react";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
@@ -10,14 +10,27 @@ import { Link } from "react-router-dom";
 import PedidosServices from "../../Services/PedidoServices";
 
 const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#B22222",
+    },
+    secondary: {
+      main: "#FFCDD2",
+    },
+  },
   typography: {
-    fontFamily: "Noto Sans JP, sans-serif",
+    fontFamily: "Roboto, sans-serif",
     h4: {
       color: "#B22222",
-      fontSize: "2rem",
-      fontWeight: "bold",
+      fontSize: "2.2rem",
+      fontWeight: 700,
     },
-    body2: {
+    h6: {
+      color: "#B22222",
+      fontSize: "1.8rem",
+      fontWeight: 600,
+    },
+    body1: {
       fontSize: "1rem",
       color: "#555",
     },
@@ -45,106 +58,125 @@ export function ListaPedidoCocina() {
   if (!loaded) return <p>Cargando...</p>;
   if (error) return <p>Error: {error}</p>;
 
-  // Obtener fecha actual en formato "DD/MM/YYYY"
   const today = new Date();
-  const todayFormatted = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+  const todayFormatted = `${String(today.getDate()).padStart(2, "0")}/${String(
+    today.getMonth() + 1
+  ).padStart(2, "0")}/${today.getFullYear()}`;
 
-  // Función para convertir la fecha del pedido a formato "DD/MM/YYYY"
   const formatDate = (dateString) => {
-    const date = new Date(dateString.replace(" ", "T")); // Convertir la fecha del formato "YYYY-MM-DD HH:MM:SS"
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Los meses empiezan en 0
+    const date = new Date(dateString.replace(" ", "T"));
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
-    return `${day}/${month}/${year}`; // Retornar la fecha en formato "DD/MM/YYYY"
+    return `${day}/${month}/${year}`;
   };
 
-  // Filtrar los pedidos para solo mostrar los que coinciden con la fecha de hoy y que no estén "Entregados"
   const filteredData = data.filter(
-    (pedido) => 
+    (pedido) =>
       formatDate(pedido.fecha) === todayFormatted && pedido.estado !== "Entregada"
   );
 
   return (
     <ThemeProvider theme={theme}>
-      <Container component="main" sx={{ mt: 4, mb: 2 }}>
-        {/* Mostrar la cantidad de pedidos de hoy */}
-        <Typography variant="h6" align="center" sx={{ mb: 3 }}>
-          Total de pedidos de hoy: {filteredData.length}
-        </Typography>
-
-        <Typography variant="h4" align="center" gutterBottom sx={{ mb: 6 }}>
-          Pedidos de Hoy
-        </Typography>
-
-        <Grid container spacing={4}>
-          {filteredData.length === 0 ? (
-            <Typography variant="body2" align="center" sx={{ width: '100%' }}>
-              No hay pedidos disponibles para hoy.
-            </Typography>
-          ) : (
-            filteredData.map((pedido) => (
-              <Grid item key={pedido.id} xs={12} sm={6} md={6}>
-                <Card
-                  sx={{
-                    border: "3px solid #B22222",
-                    borderRadius: "20px",
-                    padding: "20px",
-                    transition: "0.3s",
-                    background: "linear-gradient(145deg, #fff, #f5f5f5)",
-                    boxShadow: "10px 10px 20px #ccc, -10px -10px 20px #fff",
-                    "&:hover": {
-                      transform: "scale(1.07)",
-                      boxShadow: "15px 15px 30px #bbb, -15px -15px 30px #fff",
-                    },
-                  }}
-                >
-                  <CardContent>
-                    <Typography
-                      variant="h6"
-                      gutterBottom
-                      sx={{ fontWeight: "bold", color: "#B22222" }}
-                    >
-                      Costo: {pedido.costo}
-                    </Typography>
-                    <Typography variant="body2" gutterBottom>
-                      Método de entrega: {pedido.metodo_entrega}
-                    </Typography>
-                    <Typography variant="body2" gutterBottom>
-                      Fecha del pedido: {formatDate(pedido.fecha)} {/* Mostrar la fecha formateada */}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      gutterBottom
+      <Container component="main" sx={{ mt: 4, mb: 7 }}>
+        <Grid container spacing={3}>
+          {/* Columna Izquierda: Lista de Pedidos */}
+          <Grid item xs={12} md={8}>
+            <Grid container spacing={3}>
+              {filteredData.length === 0 ? (
+                <Typography variant="body1" align="center" sx={{ width: "100%" }}>
+                  No hay pedidos disponibles para hoy.
+                </Typography>
+              ) : (
+                filteredData.map((pedido) => (
+                  <Grid item key={pedido.id} xs={12} sm={6} md={6}>
+                    <Card
                       sx={{
-                        color:
-                          pedido.estado === "Pendiente"
-                            ? "orange"
-                            : "red", // Excluir "Entregado"
+                        borderRadius: 3,
+                        boxShadow: 3,
+                        backgroundColor: "#FFEBEE",
+                        "&:hover": {
+                          boxShadow: 6,
+                        },
                       }}
                     >
-                      Estado: {pedido.estado}
-                    </Typography>
-                  </CardContent>
-                  <Button
-                    component={Link}
-                    to={`/cocina/${pedido.id}`}
-                    variant="contained"
-                    sx={{
-                      backgroundColor: "#B22222",
-                      "&:hover": { backgroundColor: "#8B0000" },
-                      borderRadius: "10px",
-                      padding: "10px 20px",
-                      fontSize: "1rem",
-                      display: "block",
-                      marginLeft: "auto", // Alinea el botón a la derecha
-                    }}
-                  >
-                    Ver productos del pedido
-                  </Button>
-                </Card>
-              </Grid>
-            ))
-          )}
+                      <CardContent>
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontWeight: 600,
+                            color: "#B22222",
+                          }}
+                        >
+                          Costo: {pedido.costo}
+                        </Typography>
+                        <Typography variant="body1" sx={{ mt: 1 }}>
+                          Método: {pedido.metodo_entrega}
+                        </Typography>
+                        <Typography variant="body1">
+                          Fecha: {formatDate(pedido.fecha)}
+                        </Typography>
+                        <Typography
+                          variant="body1"
+                          sx={{
+                            mt: 1,
+                            fontWeight: 500,
+                            color:
+                              pedido.estado === "Pendiente"
+                                ? "#F57C00"
+                                : pedido.estado === "Preparando"
+                                ? "#B22222"
+                                : "#D32F2F",
+                          }}
+                        >
+                          Estado: {pedido.estado}
+                        </Typography>
+                      </CardContent>
+                      <Button
+                        component={Link}
+                        to={`/cocina/${pedido.id}`}
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        sx={{
+                          borderRadius: 0,
+                          fontSize: "1rem",
+                          py: 1.5,
+                        }}
+                      >
+                        Ver Detalles
+                      </Button>
+                    </Card>
+                  </Grid>
+                ))
+              )}
+            </Grid>
+          </Grid>
+
+          {/* Columna Derecha: Cantidad de Pedidos */}
+          <Grid item xs={12} md={4}>
+            <Card
+              sx={{
+                backgroundColor: "#B22222",
+                color: "#fff",
+                textAlign: "center",
+                borderRadius: 3,
+                boxShadow: 4,
+              }}
+            >
+              <CardContent>
+                <Typography variant="h6" sx={{ fontSize: "1.5rem", color: "white" }}>
+                  Total de Pedidos de Hoy
+                </Typography>
+                <Typography
+                  variant="h4"
+                  sx={{ fontSize: "3rem", fontWeight: 700, color: "white" }}
+                >
+                  {filteredData.length}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
       </Container>
     </ThemeProvider>

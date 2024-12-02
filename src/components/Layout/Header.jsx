@@ -128,6 +128,12 @@ function Header(props) {
       segment: `cocina`,
       title: "Cocina",
       icon: <KitchenIcon />,
+      roles: ["Cocina"],
+    },
+    {
+      segment: `usuario-table`,
+      title: "Usuarios",
+      icon: <BuildIcon />,
       roles: ["Administrador"],
     },
   ];

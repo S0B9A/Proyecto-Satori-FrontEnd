@@ -29,11 +29,9 @@ export function MenuActual() {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
   const [loaded, setLoaded] = useState(false);
-  
-  //Url para acceder a la imagenes guardadas en el API
-const BASE_URL = import.meta.env.VITE_BASE_URL + 'uploads';
 
-  // Llamar al API y obtener la lista de productos y combos
+  const BASE_URL = import.meta.env.VITE_BASE_URL + "uploads";
+
   useEffect(() => {
     MenuServices.getMenuActual()
       .then((response) => {
@@ -50,7 +48,6 @@ const BASE_URL = import.meta.env.VITE_BASE_URL + 'uploads';
   if (!loaded) return <p>Cargando..</p>;
   if (error) return <p>Error: {error}</p>;
 
-  // Función para agrupar elementos por categoría
   const groupByCategory = (items) => {
     return items.reduce((grouped, item) => {
       const category = item.categoria || "Sin Categoría";
@@ -67,39 +64,34 @@ const BASE_URL = import.meta.env.VITE_BASE_URL + 'uploads';
 
   return (
     <ThemeProvider theme={theme}>
+      <div
+        style={{
+          backgroundImage: 'url("https://t4.ftcdn.net/jpg/04/89/15/99/360_F_489159925_C7DHc0L0lNaAz7HliGGyNZvz1SptRis6.jpg")',
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          color: "#fff",
+          textAlign: "center",
+          padding: "60px 20px",
+          marginBottom: "20px",
+        }}
+      >
+        <Typography variant="h3" component="h1" sx={{ fontWeight: "bold" }}>
+          ¡Bienvenido a nuestro Restaurante Asiático!
+        </Typography>
+        <Typography variant="h5" sx={{ marginTop: "20px" }}>
+          Descubre sabores únicos y auténticos de Asia.
+        </Typography>
+      </div>
+
       <Container component="main" sx={{ mt: 4, mb: 2 }}>
-        {/* Mostrar la información del menú disponible */}
         <Typography component="h1" variant="h4" align="center" gutterBottom>
-          <img
-            src="https://png.pngtree.com/png-clipart/20210502/original/pngtree-pink-cartoon-cherry-flower-petal-png-image_6266152.png"
-            alt="Flor de Cerezo"
-            style={{
-              width: "20px",
-              height: "auto",
-              display: "inline-block",
-              marginRight: "10px",
-              marginLeft: "10px",
-            }}
-          />
           MENÚ DISPONIBLE
-          <img
-            src="https://png.pngtree.com/png-clipart/20210502/original/pngtree-pink-cartoon-cherry-flower-petal-png-image_6266152.png"
-            alt="Flor de Cerezo"
-            style={{
-              width: "20px",
-              height: "auto",
-              display: "inline-block",
-              marginRight: "10px",
-              marginLeft: "10px",
-            }}
-          />
         </Typography>
         <Typography align="center" variant="h6" gutterBottom>
           Disponibilidad: {data.fecha_inicio} - {data.fecha_fin} (
           {data.hora_inicio} - {data.hora_fin})
         </Typography>
 
-        {/* Mostrar productos agrupados por categoría */}
         {Object.keys(productosPorCategoria).map((categoria) => (
           <div key={categoria}>
             <Typography variant="h6" component="h2" sx={{ mt: 3 }}>
@@ -150,7 +142,7 @@ const BASE_URL = import.meta.env.VITE_BASE_URL + 'uploads';
                         color="#f44336"
                         sx={{ fontSize: "1.1rem" }}
                       >
-                        {producto.precio}
+                        {"₡" + producto.precio}
                       </Typography>
                       <IconButton
                         component={Link}
@@ -158,13 +150,12 @@ const BASE_URL = import.meta.env.VITE_BASE_URL + 'uploads';
                         aria-label="ver detalles"
                         sx={{
                           color: "#f44336",
-                          fontSize: "1.2rem", // Hacer el icono más pequeño
-                          alignSelf: "flex-end", // Mover el icono al final de la tarjeta
-                          marginTop: "auto", // Asegura que esté alineado al fondo
+                          fontSize: "1.2rem",
+                          alignSelf: "flex-end",
+                          marginTop: "auto",
                         }}
                       >
-                        <InfoIcon sx={{ fontSize: "1.5rem" }} />{" "}
-                        {/* Ajuste del tamaño del ícono */}
+                        <InfoIcon sx={{ fontSize: "1.5rem" }} />
                       </IconButton>
                     </CardContent>
                   </Card>
@@ -174,7 +165,6 @@ const BASE_URL = import.meta.env.VITE_BASE_URL + 'uploads';
           </div>
         ))}
 
-        {/* Mostrar combos agrupados por categoría */}
         <Typography
           component="h1"
           variant="h4"
@@ -256,7 +246,7 @@ const BASE_URL = import.meta.env.VITE_BASE_URL + 'uploads';
                         color="#f44336"
                         sx={{ fontSize: "1.1rem" }}
                       >
-                        {combo.precio}
+                        {"₡" + combo.precio}
                       </Typography>
                       <IconButton
                         component={Link}
@@ -264,13 +254,12 @@ const BASE_URL = import.meta.env.VITE_BASE_URL + 'uploads';
                         aria-label="ver detalles"
                         sx={{
                           color: "#f44336",
-                          fontSize: "1.2rem", // Hacer el icono más pequeño
-                          alignSelf: "flex-end", // Mover el icono al final de la tarjeta
-                          marginTop: "auto", // Asegura que esté alineado al fondo
+                          fontSize: "1.2rem",
+                          alignSelf: "flex-end",
+                          marginTop: "auto",
                         }}
                       >
-                        <InfoIcon sx={{ fontSize: "1.5rem" }} />{" "}
-                        {/* Ajuste del tamaño del ícono */}
+                        <InfoIcon sx={{ fontSize: "1.5rem" }} />
                       </IconButton>
                     </CardContent>
                   </Card>

@@ -38,4 +38,4 @@ Interfaz de usuario para el sistema de gestión de un servicio de comida. Este p
 
 1. Clona el repositorio:
 ```bash
-git clone https://github.com/usuario/frontend-comida.git
+https://github.com/S0B9A/Proyecto-Satori-FrontEnd.git
